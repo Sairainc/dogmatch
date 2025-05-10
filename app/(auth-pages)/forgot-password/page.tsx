@@ -11,27 +11,36 @@ export default async function ForgotPassword(props: {
 }) {
   const searchParams = await props.searchParams;
   return (
-    <>
-      <form className="flex-1 flex flex-col w-full gap-2 text-foreground [&>input]:mb-6 min-w-64 max-w-64 mx-auto">
-        <div>
-          <h1 className="text-2xl font-medium">Reset Password</h1>
-          <p className="text-sm text-secondary-foreground">
-            Already have an account?{" "}
-            <Link className="text-primary underline" href="/sign-in">
-              Sign in
-            </Link>
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
-          <SubmitButton formAction={forgotPasswordAction}>
-            Reset Password
+    <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
+        <h1 className="text-2xl font-bold text-center mb-2">パスワードリセット</h1>
+        <p className="text-sm text-gray-600 text-center mb-8">
+          登録したメールアドレスを入力してください。
+          パスワードリセット用のリンクを送信します。
+        </p>
+        <form className="flex flex-col gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">メールアドレス</Label>
+            <Input name="email" placeholder="example@email.com" required />
+          </div>
+          <SubmitButton 
+            formAction={forgotPasswordAction}
+            className="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-full mt-4"
+          >
+            リセットリンクを送信
           </SubmitButton>
+          <div className="text-center mt-4">
+            <Link
+              className="text-sm text-pink-500 hover:underline"
+              href="/sign-in"
+            >
+              ログインに戻る
+            </Link>
+          </div>
           <FormMessage message={searchParams} />
-        </div>
-      </form>
+        </form>
+      </div>
       <SmtpMessage />
-    </>
+    </div>
   );
 }

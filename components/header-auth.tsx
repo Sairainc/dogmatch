@@ -21,7 +21,7 @@ export default async function AuthButton() {
               variant={"default"}
               className="font-normal pointer-events-none"
             >
-              Please update .env.local file with anon key and url
+              環境変数の設定が必要です
             </Badge>
           </div>
           <div className="flex gap-2">
@@ -32,7 +32,7 @@ export default async function AuthButton() {
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
-              <Link href="/sign-in">Sign in</Link>
+              <Link href="/sign-in">ログイン</Link>
             </Button>
             <Button
               asChild
@@ -41,7 +41,7 @@ export default async function AuthButton() {
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
-              <Link href="/sign-up">Sign up</Link>
+              <Link href="/sign-up">新規登録</Link>
             </Button>
           </div>
         </div>
@@ -50,20 +50,20 @@ export default async function AuthButton() {
   }
   return user ? (
     <div className="flex items-center gap-4">
-      Hey, {user.email}!
+      <span className="text-sm text-gray-600">{user.email}</span>
       <form action={signOutAction}>
-        <Button type="submit" variant={"outline"}>
-          Sign out
+        <Button type="submit" variant={"outline"} size="sm">
+          ログアウト
         </Button>
       </form>
     </div>
   ) : (
     <div className="flex gap-2">
       <Button asChild size="sm" variant={"outline"}>
-        <Link href="/sign-in">Sign in</Link>
+        <Link href="/sign-in">ログイン</Link>
       </Button>
       <Button asChild size="sm" variant={"default"}>
-        <Link href="/sign-up">Sign up</Link>
+        <Link href="/sign-up">新規登録</Link>
       </Button>
     </div>
   );
