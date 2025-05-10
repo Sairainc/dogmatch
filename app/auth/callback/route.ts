@@ -24,6 +24,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}${redirectTo}`);
   }
 
-  // URL to redirect to after sign up process completes
-  return NextResponse.redirect(`${origin}/protected`);
+  // Google認証後のリダイレクト先を /discovery に変更
+  return NextResponse.redirect(`${origin}/discovery`);
 }
