@@ -12,7 +12,12 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    
+    if (error) {
+      console.error("Auth callback error:", error.message);
+      return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(error.message)}`, origin));
+    }
   }
 
   if (redirectTo) {
