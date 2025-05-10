@@ -7,6 +7,7 @@ import Link from "next/link";
 import "./globals.css";
 import Footer from '@/components/Footer';
 import type { Metadata } from 'next';
+import { createClient } from "@/utils/supabase/server";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -23,11 +24,14 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <html lang="ja" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
@@ -50,7 +54,7 @@ export default function RootLayout({
               <div className="flex-1">
                 {children}
               </div>
-              <Footer />
+              {user && <Footer />}
             </div>
           </main>
         </ThemeProvider>
