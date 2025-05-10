@@ -30,7 +30,7 @@ export async function GET(request: Request) {
       }
 
       // パスワードリセットページに直接リダイレクト
-      return NextResponse.redirect(new URL(next, requestUrl.origin));
+      return NextResponse.redirect(new URL("/protected/reset-password", requestUrl.origin));
     }
 
     // 通常のメール認証の場合
