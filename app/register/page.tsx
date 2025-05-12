@@ -2,7 +2,7 @@ import { RegistrationForm } from '@/components/forms/RegistrationForm'
 
 export default function RegisterPage() {
   return (
-    <div className="container mx-auto py-10">
+    <div className="min-h-screen bg-gray-100 py-10">
       <RegistrationForm />
     </div>
   )

@@ -37,16 +37,40 @@ export const updateSession = async (request: NextRequest) => {
 
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
-    const user = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     // 認証が必要なルート
-    if (request.nextUrl.pathname.startsWith("/protected") && user.error) {
+    if (request.nextUrl.pathname.startsWith("/protected") && !user) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
+
+    // 登録ページへのアクセスは常に許可
+    if (request.nextUrl.pathname === "/register") {
+      return response;
+    }
+
+    // ログイン済みユーザーのプロフィール完了確認
+    if (user && !request.nextUrl.pathname.startsWith("/api") && 
+        !request.nextUrl.pathname.includes('_next') && 
+        !request.nextUrl.pathname.includes('favicon') &&
+        request.nextUrl.pathname !== "/register") {
+      
+      // プロフィール情報を取得
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, is_profile_completed')
+        .eq('id', user.id)
+        .single();
+      
+      // プロフィールが未完了の場合は登録ページへリダイレクト
+      if (!profile || !profile.is_profile_completed) {
+        return NextResponse.redirect(new URL("/register", request.url));
+      }
     }
 
     // ルートページにアクセスした場合
     if (request.nextUrl.pathname === "/") {
-      if (user.error) {
+      if (!user) {
         // 未認証の場合はサインインページにリダイレクト
         return NextResponse.redirect(new URL("/sign-in", request.url));
       } else {
