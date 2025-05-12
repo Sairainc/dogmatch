@@ -301,7 +301,7 @@ export function RegistrationForm() {
                         <FormControl>
                           <Input 
                             {...field} 
-                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                             placeholder="例：田中太郎"
                           />
                         </FormControl>
@@ -320,7 +320,7 @@ export function RegistrationForm() {
                           <Input 
                             type="date" 
                             {...field} 
-                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                           />
                         </FormControl>
                         <FormMessage className="text-pink-500 text-sm" />
@@ -336,7 +336,7 @@ export function RegistrationForm() {
                         <FormLabel className="text-gray-700 font-medium">性別 <span className="text-pink-500">*</span></FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all">
+                            <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700">
                               <SelectValue placeholder="性別を選択" />
                             </SelectTrigger>
                           </FormControl>
@@ -361,7 +361,7 @@ export function RegistrationForm() {
                           <FormControl>
                             <Input 
                               {...field} 
-                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                               placeholder="例：東京都"
                             />
                           </FormControl>
@@ -379,7 +379,7 @@ export function RegistrationForm() {
                           <FormControl>
                             <Input 
                               {...field} 
-                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                               placeholder="例：渋谷区"
                             />
                           </FormControl>
@@ -398,7 +398,7 @@ export function RegistrationForm() {
                         <FormControl>
                           <Textarea 
                             {...field} 
-                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all min-h-[120px]"
+                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all min-h-[120px] text-gray-700"
                             placeholder="あなた自身や愛犬との生活について教えてください"
                           />
                         </FormControl>
@@ -453,7 +453,7 @@ export function RegistrationForm() {
                         <FormControl>
                           <Input 
                             {...field} 
-                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                             placeholder="例：ポチ"
                           />
                         </FormControl>
@@ -471,7 +471,7 @@ export function RegistrationForm() {
                         <FormControl>
                           <Input 
                             {...field} 
-                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                             placeholder="例：柴犬"
                           />
                         </FormControl>
@@ -493,7 +493,7 @@ export function RegistrationForm() {
                               min="0" 
                               {...field} 
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                             />
                           </FormControl>
                           <FormMessage className="text-pink-500 text-sm" />
@@ -514,7 +514,7 @@ export function RegistrationForm() {
                               max="11" 
                               {...field} 
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all"
+                              className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700"
                             />
                           </FormControl>
                           <FormMessage className="text-pink-500 text-sm" />
@@ -532,7 +532,7 @@ export function RegistrationForm() {
                           <FormLabel className="text-gray-700 font-medium">性別 <span className="text-pink-500">*</span></FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all">
+                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700">
                                 <SelectValue placeholder="性別を選択" />
                               </SelectTrigger>
                             </FormControl>
@@ -554,7 +554,7 @@ export function RegistrationForm() {
                           <FormLabel className="text-gray-700 font-medium">サイズ <span className="text-pink-500">*</span></FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all">
+                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700">
                                 <SelectValue placeholder="サイズを選択" />
                               </SelectTrigger>
                             </FormControl>
@@ -579,7 +579,7 @@ export function RegistrationForm() {
                         <FormControl>
                           <Textarea 
                             {...field} 
-                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all min-h-[120px]"
+                            className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all min-h-[120px] text-gray-700"
                             placeholder="愛犬の性格や好きなこと、特徴などを書いてください"
                           />
                         </FormControl>
@@ -600,7 +600,7 @@ export function RegistrationForm() {
                               onValueChange={(value) => field.onChange(value === 'true')}
                               defaultValue={field.value?.toString()}
                             >
-                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all">
+                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700">
                                 <SelectValue placeholder="選択してください" />
                               </SelectTrigger>
                               <SelectContent className="rounded-xl border-gray-200">
@@ -625,7 +625,7 @@ export function RegistrationForm() {
                               onValueChange={(value) => field.onChange(value === 'true')}
                               defaultValue={field.value?.toString()}
                             >
-                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all">
+                              <SelectTrigger className="rounded-xl p-3 border-gray-200 focus:border-pink-500 focus:ring focus:ring-pink-100 transition-all text-gray-700">
                                 <SelectValue placeholder="選択してください" />
                               </SelectTrigger>
                               <SelectContent className="rounded-xl border-gray-200">
