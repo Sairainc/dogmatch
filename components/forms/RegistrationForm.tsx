@@ -244,19 +244,19 @@ export function RegistrationForm() {
   return (
     <div className="max-w-md mx-auto">
       <Card className="border-0 rounded-3xl overflow-hidden shadow-md">
-        <div className="bg-pink-500 p-6 text-center text-white">
+        <div className="bg-gray-100 p-6 text-center text-gray-800">
           <div className="flex justify-center mb-3">
             <div className="rounded-full bg-white bg-opacity-20 p-4">
               {step === 'user' 
-                ? <UserCircle size={32} className="text-white" />
-                : <Dog size={32} className="text-white" />
+                ? <UserCircle size={32} className="text-gray-700" />
+                : <Dog size={32} className="text-gray-700" />
               }
             </div>
           </div>
           <h2 className="text-xl font-bold">
             {step === 'user' ? 'プロフィール登録' : '愛犬情報登録'}
           </h2>
-          <p className="text-sm mt-1 text-white text-opacity-90">
+          <p className="text-sm mt-1 text-gray-600">
             {step === 'user' ? 'あなたについて教えてください' : '愛犬の情報を入力してください'}
           </p>
         </div>
@@ -280,7 +280,7 @@ export function RegistrationForm() {
                       onChange={handleAvatarUpload}
                       disabled={uploading}
                     />
-                    <div className="absolute bottom-0 left-0 right-0 bg-pink-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
                       {uploading ? '読込中...' : '写真を選択'}
                     </div>
                   </div>
@@ -292,16 +292,16 @@ export function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-gray-600">
-                        ユーザー名 <span className="text-pink-500">*</span>
+                        ユーザー名 <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input 
                           {...field}
-                          className="bg-black border-0 rounded-md text-white h-12 px-4"
+                          className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：田中太郎"
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -312,16 +312,16 @@ export function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-gray-600">
-                        生年月日 <span className="text-pink-500">*</span>
+                        生年月日 <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input 
                           type="date" 
                           {...field}
-                          className="bg-black border-0 rounded-md text-white h-12 px-4"
+                          className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -332,11 +332,11 @@ export function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-gray-600">
-                        性別 <span className="text-pink-500">*</span>
+                        性別 <span className="text-red-500">*</span>
                       </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-black border-0 rounded-md text-white h-12 px-4">
+                          <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                             <SelectValue placeholder="性別を選択" />
                           </SelectTrigger>
                         </FormControl>
@@ -346,7 +346,7 @@ export function RegistrationForm() {
                           <SelectItem value="other">その他</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -358,16 +358,16 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          都道府県 <span className="text-pink-500">*</span>
+                          都道府県 <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input 
                             {...field}
-                            className="bg-black border-0 rounded-md text-white h-12 px-4"
+                            className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                             placeholder="例：東京都"
                           />
                         </FormControl>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -378,16 +378,16 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          市区町村 <span className="text-pink-500">*</span>
+                          市区町村 <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input 
                             {...field}
-                            className="bg-black border-0 rounded-md text-white h-12 px-4"
+                            className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                             placeholder="例：渋谷区"
                           />
                         </FormControl>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -402,18 +402,18 @@ export function RegistrationForm() {
                       <FormControl>
                         <Textarea 
                           {...field}
-                          className="bg-black border-0 rounded-md text-white min-h-[100px] px-4 py-3"
+                          className="bg-white border border-gray-300 rounded-md text-gray-800 min-h-[100px] px-4 py-3"
                           placeholder="あなた自身や愛犬との生活について教えてください"
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-pink-500 hover:bg-pink-600 text-white rounded-full py-3 mt-4">
+                  className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-full py-3 mt-4">
                   次へ
                 </Button>
               </form>
@@ -436,7 +436,7 @@ export function RegistrationForm() {
                       onChange={handleDogPhotoUpload}
                       disabled={uploadingDog}
                     />
-                    <div className="absolute bottom-0 left-0 right-0 bg-pink-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
                       {uploadingDog ? '読込中...' : '愛犬の写真を選択'}
                     </div>
                   </div>
@@ -448,16 +448,16 @@ export function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-gray-600">
-                        愛犬の名前 <span className="text-pink-500">*</span>
+                        愛犬の名前 <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input 
                           {...field}
-                          className="bg-black border-0 rounded-md text-white h-12 px-4"
+                          className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：ポチ"
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -468,16 +468,16 @@ export function RegistrationForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm text-gray-600">
-                        犬種 <span className="text-pink-500">*</span>
+                        犬種 <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
                         <Input 
                           {...field}
-                          className="bg-black border-0 rounded-md text-white h-12 px-4"
+                          className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：柴犬"
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -489,7 +489,7 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          年齢（歳）<span className="text-pink-500">*</span>
+                          年齢（歳）<span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input 
@@ -497,10 +497,10 @@ export function RegistrationForm() {
                             min="0" 
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            className="bg-black border-0 rounded-md text-white h-12 px-4"
+                            className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           />
                         </FormControl>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -518,10 +518,10 @@ export function RegistrationForm() {
                             max="11" 
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                            className="bg-black border-0 rounded-md text-white h-12 px-4"
+                            className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           />
                         </FormControl>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -534,11 +534,11 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          性別 <span className="text-pink-500">*</span>
+                          性別 <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-black border-0 rounded-md text-white h-12 px-4">
+                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                               <SelectValue placeholder="性別を選択" />
                             </SelectTrigger>
                           </FormControl>
@@ -547,7 +547,7 @@ export function RegistrationForm() {
                             <SelectItem value="female">メス</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -558,11 +558,11 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          サイズ <span className="text-pink-500">*</span>
+                          サイズ <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-black border-0 rounded-md text-white h-12 px-4">
+                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                               <SelectValue placeholder="サイズを選択" />
                             </SelectTrigger>
                           </FormControl>
@@ -572,7 +572,7 @@ export function RegistrationForm() {
                             <SelectItem value="large">大型</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -587,11 +587,11 @@ export function RegistrationForm() {
                       <FormControl>
                         <Textarea 
                           {...field}
-                          className="bg-black border-0 rounded-md text-white min-h-[100px] px-4 py-3"
+                          className="bg-white border border-gray-300 rounded-md text-gray-800 min-h-[100px] px-4 py-3"
                           placeholder="愛犬の性格や好きなこと、特徴などを書いてください"
                         />
                       </FormControl>
-                      <FormMessage className="text-pink-500 text-xs" />
+                      <FormMessage className="text-red-500 text-xs" />
                     </FormItem>
                   )}
                 />
@@ -603,14 +603,14 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          ワクチン接種済み <span className="text-pink-500">*</span>
+                          ワクチン接種済み <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value === 'true')}
                           defaultValue={field.value?.toString()}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-black border-0 rounded-md text-white h-12 px-4">
+                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                               <SelectValue placeholder="選択してください" />
                             </SelectTrigger>
                           </FormControl>
@@ -619,7 +619,7 @@ export function RegistrationForm() {
                             <SelectItem value="false">いいえ</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -630,14 +630,14 @@ export function RegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          去勢・避妊済み <span className="text-pink-500">*</span>
+                          去勢・避妊済み <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value === 'true')}
                           defaultValue={field.value?.toString()}
                         >
                           <FormControl>
-                            <SelectTrigger className="bg-black border-0 rounded-md text-white h-12 px-4">
+                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                               <SelectValue placeholder="選択してください" />
                             </SelectTrigger>
                           </FormControl>
@@ -646,7 +646,7 @@ export function RegistrationForm() {
                             <SelectItem value="false">いいえ</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage className="text-pink-500 text-xs" />
+                        <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
@@ -663,7 +663,7 @@ export function RegistrationForm() {
                   </Button>
                   <Button 
                     type="submit" 
-                    className="w-full bg-pink-500 hover:bg-pink-600 text-white rounded-full">
+                    className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-full">
                     {dogCount > 1 ? '次の愛犬を登録' : '登録完了'}
                   </Button>
                 </div>
