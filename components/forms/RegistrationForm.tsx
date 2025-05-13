@@ -108,7 +108,13 @@ export function RegistrationForm() {
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${Math.random()}.${fileExt}`;
+      
+      // ユーザーIDを取得
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ユーザーが見つかりません');
+      
+      // ユーザーIDを含めたファイルパスに変更
+      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('profiles')
@@ -138,7 +144,13 @@ export function RegistrationForm() {
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const filePath = `dogs/${Math.random()}.${fileExt}`;
+      
+      // ユーザーIDを取得
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ユーザーが見つかりません');
+      
+      // ユーザーIDを含めたファイルパスに変更
+      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('dogs')
