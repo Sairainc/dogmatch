@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { Lock } from 'lucide-react';
+import { fixImageUrl } from '@/utils/utils';
 
 export default function HotLikesPage() {
   return (

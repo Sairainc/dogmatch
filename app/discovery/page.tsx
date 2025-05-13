@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Heart, X, Camera } from 'lucide-react';
+import { fixImageUrl } from '@/utils/utils';
 
 export default function DiscoveryPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -38,25 +39,6 @@ export default function DiscoveryPage() {
     console.log("Profile image failed to load");
   };
 
-  // 画像URLを修正する関数
-  const fixImageUrl = (url: string) => {
-    if (!url) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
-    
-    // URLが既に正しいかチェック
-    if (url.startsWith('http') || url.startsWith('/')) {
-      return url;
-    }
-    
-    // SupabaseのストレージURLを正しく構築
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (url.includes('supabase') && !url.startsWith('http') && supabaseUrl) {
-      // URLを修復
-      return `${supabaseUrl}/storage/v1/object/public/${url}`;
-    }
-    
-    return url;
-  };
-
   if (currentIndex >= profiles.length) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -66,8 +48,6 @@ export default function DiscoveryPage() {
   }
 
   const currentProfile = profiles[currentIndex];
-  // 安全なプレースホルダーとしてBase64 SVGを使用
-  const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
 
   return (
     <div className="relative h-screen bg-gray-100">
@@ -75,7 +55,7 @@ export default function DiscoveryPage() {
         <div className="relative flex-1 m-4 rounded-2xl overflow-hidden shadow-lg">
           {!imageError ? (
             <img
-              src={fixImageUrl(currentProfile.image) || placeholderImage}
+              src={fixImageUrl(currentProfile.image)}
               alt={currentProfile.dogName}
               className="w-full h-full object-cover"
               onError={handleImageError}

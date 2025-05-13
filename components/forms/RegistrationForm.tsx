@@ -27,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { Camera, Dog, Upload, UserCircle, CreditCard } from 'lucide-react';
+import { fixImageUrl } from '@/utils/utils';
 
 // バリデーションスキーマ
 const userSchema = z.object({
@@ -725,25 +726,6 @@ export function RegistrationForm() {
       default:
         return null;
     }
-  };
-
-  // プレビュー画像のURLを修正する関数を追加
-  const fixImageUrl = (url: string) => {
-    if (!url) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
-    
-    // URLが既に正しいかチェック
-    if (url.startsWith('http') || url.startsWith('/')) {
-      return url;
-    }
-    
-    // SupabaseのストレージURLを正しく構築
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (url.includes('supabase') && !url.startsWith('http') && supabaseUrl) {
-      // URLを修復
-      return `${supabaseUrl}/storage/v1/object/public/${url}`;
-    }
-    
-    return url;
   };
 
   // 読み込み中の表示

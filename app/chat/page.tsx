@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-import { Search } from 'lucide-react';
+import { Search, Camera } from 'lucide-react';
+import { fixImageUrl } from '@/utils/utils';
 
 export default function ChatPage() {
   // ダミーデータ
@@ -45,11 +45,13 @@ export default function ChatPage() {
             <div key={match.id} className="bg-white p-4 hover:bg-gray-50 cursor-pointer">
               <div className="flex items-center gap-4">
                 <div className="relative w-14 h-14 rounded-full overflow-hidden">
-                  <Image
-                    src={match.image}
+                  <img
+                    src={fixImageUrl(match.image)}
                     alt={match.name}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.parentElement!.innerHTML = `<div class="w-full h-full bg-gray-200 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>`;
+                    }}
                   />
                 </div>
                 <div className="flex-1">

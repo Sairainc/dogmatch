@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Camera, Edit2 } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
+import { fixImageUrl } from '@/utils/utils';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({
@@ -112,25 +113,6 @@ export default function ProfilePage() {
     router.push('/register');
   };
 
-  // 画像URLを修正する関数
-  const fixImageUrl = (url: string) => {
-    if (!url) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
-    
-    // URLが既に正しいかチェック
-    if (url.startsWith('http') || url.startsWith('/')) {
-      return url;
-    }
-    
-    // SupabaseのストレージURLを正しく構築
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (url.includes('supabase') && !url.startsWith('http') && supabaseUrl) {
-      // URLを修復
-      return `${supabaseUrl}/storage/v1/object/public/${url}`;
-    }
-    
-    return url;
-  };
-
   // 画像読み込みエラー時のハンドラー
   const handleAvatarError = () => {
     setAvatarError(true);
@@ -160,9 +142,6 @@ export default function ProfilePage() {
     }
   };
 
-  // 安全なプレースホルダーとしてBase64 SVGを使用
-  const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
-
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
       <div className="max-w-md mx-auto">
@@ -170,7 +149,7 @@ export default function ProfilePage() {
           <div className="relative h-64">
             {!avatarError ? (
               <img
-                src={fixImageUrl(profile.avatar_url) || placeholderImage}
+                src={fixImageUrl(profile.avatar_url)}
                 alt={profile.username || 'プロフィール画像'}
                 className="h-full w-full object-cover rounded-b-3xl"
                 onError={handleAvatarError}
@@ -222,7 +201,7 @@ export default function ProfilePage() {
                       {dog.photos_urls && dog.photos_urls.length > 0 && !dogPhotoErrors[dog.id] ? (
                         <div className="relative w-16 h-16 rounded-full overflow-hidden">
                           <img
-                            src={fixImageUrl(dog.photos_urls[0]) || placeholderImage}
+                            src={fixImageUrl(dog.photos_urls[0])}
                             alt={dog.name}
                             className="w-full h-full object-cover"
                             onError={() => handleDogPhotoError(dog.id)}
