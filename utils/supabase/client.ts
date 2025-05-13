@@ -10,5 +10,27 @@ export const createClient = () => {
   
   console.log("Supabase URL:", supabaseUrl); // Debug
   
-  return createBrowserClient(supabaseUrl, supabaseKey);
+  // クライアントインスタンスを作成し、カスタム設定を追加
+  const client = createBrowserClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+    },
+    global: {
+      // バージョンを明示的に設定
+      fetch: (url, options) => {
+        // リクエストのURLをログ出力（デバッグ用）
+        console.log("Supabase Fetch:", url);
+        return fetch(url, {
+          ...options,
+          // CORSヘッダーを追加
+          headers: {
+            ...options?.headers,
+            'Access-Control-Allow-Origin': '*',
+          }
+        });
+      }
+    }
+  });
+  
+  return client;
 };

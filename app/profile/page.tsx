@@ -114,14 +114,28 @@ export default function ProfilePage() {
   };
 
   // 画像読み込みエラー時のハンドラー
-  const handleAvatarError = () => {
+  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setAvatarError(true);
-    console.log("Avatar image failed to load");
+    console.log("Avatar image failed to load", e);
+    // 元のURLをログ出力
+    console.log("Failed URL:", e.currentTarget.src);
+    
+    // CORSエラーかどうかを確認
+    if (e.currentTarget.naturalWidth === 0) {
+      console.log("Possible CORS issue with avatar image");
+    }
   };
 
-  const handleDogPhotoError = (dogId: string) => {
+  const handleDogPhotoError = (dogId: string, e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     setDogPhotoErrors(prev => ({...prev, [dogId]: true}));
-    console.log(`Dog photo for dog ${dogId} failed to load`);
+    console.log(`Dog photo for dog ${dogId} failed to load`, e);
+    // 元のURLをログ出力
+    console.log("Failed URL:", e.currentTarget.src);
+    
+    // CORSエラーかどうかを確認
+    if (e.currentTarget.naturalWidth === 0) {
+      console.log("Possible CORS issue with dog image");
+    }
   };
 
   if (isLoading) {
@@ -204,7 +218,7 @@ export default function ProfilePage() {
                             src={fixImageUrl(dog.photos_urls[0])}
                             alt={dog.name}
                             className="w-full h-full object-cover"
-                            onError={() => handleDogPhotoError(dog.id)}
+                            onError={(e) => handleDogPhotoError(dog.id, e)}
                           />
                         </div>
                       ) : (

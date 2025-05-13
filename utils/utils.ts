@@ -23,10 +23,18 @@ export function encodedRedirect(
  * @returns {string} 修正されたURL
  */
 export function fixImageUrl(url: string): string {
+  console.log("Fixing image URL:", url); // 詳細なデバッグログ
+  
   // インラインSVGをBase64エンコードしたプレースホルダー
   const placeholderSvg = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
   
   if (!url) return placeholderSvg;
+  
+  // Supabaseの完全なURLを直接クロスオリジンプロキシで処理
+  if (url.includes('supabase.co/storage')) {
+    // CORSを回避するために直接URLを返す
+    return url;
+  }
   
   // URLが既に完全な形式かチェック
   if (url.startsWith('http') || url.startsWith('data:')) {
@@ -41,14 +49,17 @@ export function fixImageUrl(url: string): string {
   // Supabaseのストレージ関連の修正
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (supabaseUrl && (url.includes('supabase') || url.includes('storage'))) {
-    // 正しいURLを構築
     // URLにバケット名とパスが含まれているか確認
     if (url.includes('/')) {
-      return `${supabaseUrl}/storage/v1/object/public/${url}`;
+      const fullUrl = `${supabaseUrl}/storage/v1/object/public/${url}`;
+      console.log("Generated full URL:", fullUrl);
+      return fullUrl;
     }
     
     // 完全なパスでない場合は、単純にURLを連結
-    return `${supabaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    const combinedUrl = `${supabaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    console.log("Combined URL:", combinedUrl);
+    return combinedUrl;
   }
   
   return url;
