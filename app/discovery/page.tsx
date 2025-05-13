@@ -72,18 +72,20 @@ export default function DiscoveryPage() {
           </div>
         </div>
 
-        <div className="flex justify-center gap-8 p-4 mb-16">
+        <div className="flex justify-center gap-16 py-2 mb-20">
           <button
             onClick={handleDislike}
-            className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center"
+            className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center"
+            aria-label="Dislike"
           >
-            <X className="w-8 h-8 text-red-500" />
+            <X className="w-7 h-7 text-red-500" />
           </button>
           <button
             onClick={handleLike}
-            className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center"
+            className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center"
+            aria-label="Like"
           >
-            <Heart className="w-8 h-8 text-pink-500" />
+            <Heart className="w-7 h-7 text-pink-500" />
           </button>
         </div>
       </div>
