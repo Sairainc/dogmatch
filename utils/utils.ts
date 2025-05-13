@@ -29,21 +29,33 @@ export function fixImageUrl(url: string): string {
   // インラインSVGをBase64エンコードしたプレースホルダー
   const placeholderSvg = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
   
-  if (!url) return placeholderSvg;
+  // URL情報を詳細にログに出力
+  console.log("URL処理開始:", url);
+  
+  // URLがない場合はプレースホルダー画像を返す
+  if (!url) {
+    console.log("URLなし、プレースホルダー使用");
+    return '/placeholder-dog.jpg'; // 静的な画像に変更（public/placeholder-dog.jpgに置く必要あり）
+  }
   
   // ローカルパスの場合はそのまま返す
   if (url.startsWith('/')) {
+    console.log("ローカルパス検出:", url);
     return url;
   }
   
-  // 本番環境のプロキシが利用できないため、直接URLを返す
+  // Supabaseの完全なURLはそのまま返す - 400エラー確認用
   if (url.includes('supabase.co/storage')) {
-    console.log("Direct URL access:", url);
-    return url;
+    console.log("Supabase URL検出:", url);
+    
+    // 現在400エラーが出るため、一時的に静的な画像を返す
+    console.log("一時対応として静的画像を返します");
+    return '/placeholder-dog.jpg'; // 静的な画像に変更（public/placeholder-dog.jpgに置く必要あり）
   }
   
   // URLが既に他の完全な形式かチェック
   if (url.startsWith('http') || url.startsWith('data:')) {
+    console.log("完全なURL検出:", url);
     return url;
   }
   
@@ -55,8 +67,9 @@ export function fixImageUrl(url: string): string {
       ? `${supabaseUrl}/storage/v1/object/public/${url}`
       : `${supabaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     
-    console.log("Generated full URL:", fullUrl);
-    return fullUrl;
+    console.log("生成されたURL:", fullUrl);
+    console.log("一時対応として静的画像を返します");
+    return '/placeholder-dog.jpg'; // 静的な画像に変更
   }
   
   return url;
