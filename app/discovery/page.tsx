@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { Heart, X, Camera } from 'lucide-react';
 
 export default function DiscoveryPage() {
@@ -41,7 +40,7 @@ export default function DiscoveryPage() {
 
   // 画像URLを修正する関数
   const fixImageUrl = (url: string) => {
-    if (!url) return '/placeholder-dog.jpg';
+    if (!url) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
     
     // URLが既に正しいかチェック
     if (url.startsWith('http') || url.startsWith('/')) {
@@ -67,19 +66,19 @@ export default function DiscoveryPage() {
   }
 
   const currentProfile = profiles[currentIndex];
+  // 安全なプレースホルダーとしてBase64 SVGを使用
+  const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
 
   return (
     <div className="relative h-screen bg-gray-100">
       <div className="max-w-md mx-auto h-full flex flex-col">
         <div className="relative flex-1 m-4 rounded-2xl overflow-hidden shadow-lg">
           {!imageError ? (
-            <Image
-              src={fixImageUrl(currentProfile.image)}
+            <img
+              src={fixImageUrl(currentProfile.image) || placeholderImage}
               alt={currentProfile.dogName}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
               onError={handleImageError}
-              unoptimized={true}
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">

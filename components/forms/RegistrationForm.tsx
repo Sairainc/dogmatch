@@ -727,6 +727,25 @@ export function RegistrationForm() {
     }
   };
 
+  // プレビュー画像のURLを修正する関数を追加
+  const fixImageUrl = (url: string) => {
+    if (!url) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+    
+    // URLが既に正しいかチェック
+    if (url.startsWith('http') || url.startsWith('/')) {
+      return url;
+    }
+    
+    // SupabaseのストレージURLを正しく構築
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (url.includes('supabase') && !url.startsWith('http') && supabaseUrl) {
+      // URLを修復
+      return `${supabaseUrl}/storage/v1/object/public/${url}`;
+    }
+    
+    return url;
+  };
+
   // 読み込み中の表示
   if (isLoading) {
     return (
@@ -799,7 +818,7 @@ export function RegistrationForm() {
                 >
                   <div className="w-12 h-12 rounded-full bg-gray-100 mr-4 overflow-hidden">
                     {dog.photos_urls && dog.photos_urls.length > 0 ? (
-                      <img src={dog.photos_urls[0]} alt={dog.name} className="w-full h-full object-cover" />
+                      <img src={fixImageUrl(dog.photos_urls[0])} alt={dog.name} className="w-full h-full object-cover" />
                     ) : (
                       <Dog className="w-full h-full p-2 text-gray-400" />
                     )}
@@ -860,7 +879,7 @@ export function RegistrationForm() {
                 <div className="flex justify-center mb-6">
                   <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt="プロフィール画像" className="w-full h-full object-cover" />
+                      <img src={fixImageUrl(avatarUrl)} alt="プロフィール画像" className="w-full h-full object-cover" />
                     ) : (
                       <Camera className="w-8 h-8 text-gray-400" />
                     )}
@@ -1017,7 +1036,7 @@ export function RegistrationForm() {
                   <div className="flex justify-center mb-6">
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {dogPhotoUrl ? (
-                        <img src={dogPhotoUrl} alt="愛犬の写真" className="w-full h-full object-cover" />
+                        <img src={fixImageUrl(dogPhotoUrl)} alt="愛犬の写真" className="w-full h-full object-cover" />
                       ) : (
                         <Upload className="w-8 h-8 text-gray-400" />
                       )}
@@ -1285,7 +1304,7 @@ export function RegistrationForm() {
                     </FormLabel>
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {idFrontUrl ? (
-                        <img src={idFrontUrl} alt="身分証明書（表面）" className="w-full h-full object-contain" />
+                        <img src={fixImageUrl(idFrontUrl)} alt="身分証明書（表面）" className="w-full h-full object-contain" />
                       ) : (
                         <CreditCard className="w-12 h-12 text-gray-400" />
                       )}
@@ -1314,7 +1333,7 @@ export function RegistrationForm() {
                     </FormLabel>
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {idBackUrl ? (
-                        <img src={idBackUrl} alt="身分証明書（裏面）" className="w-full h-full object-contain" />
+                        <img src={fixImageUrl(idBackUrl)} alt="身分証明書（裏面）" className="w-full h-full object-contain" />
                       ) : (
                         <CreditCard className="w-12 h-12 text-gray-400" />
                       )}

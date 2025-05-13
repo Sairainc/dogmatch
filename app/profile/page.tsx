@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Camera, Edit2 } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
@@ -115,7 +114,7 @@ export default function ProfilePage() {
 
   // 画像URLを修正する関数
   const fixImageUrl = (url: string) => {
-    if (!url) return '/placeholder-dog.jpg';
+    if (!url) return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
     
     // URLが既に正しいかチェック
     if (url.startsWith('http') || url.startsWith('/')) {
@@ -161,27 +160,25 @@ export default function ProfilePage() {
     }
   };
 
+  // 安全なプレースホルダーとしてBase64 SVGを使用
+  const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjEwMCIgeT0iMTAwIiBmb250LXNpemU9IjE4IiBmaWxsPSIjYWFhYWFhIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-b-3xl shadow-lg">
           <div className="relative h-64">
             {!avatarError ? (
-              <Image
-                src={fixImageUrl(profile.avatar_url)}
+              <img
+                src={fixImageUrl(profile.avatar_url) || placeholderImage}
                 alt={profile.username || 'プロフィール画像'}
-                fill
-                className="object-cover rounded-b-3xl"
+                className="h-full w-full object-cover rounded-b-3xl"
                 onError={handleAvatarError}
-                unoptimized={true}
               />
             ) : (
-              <Image
-                src="/placeholder-dog.jpg"
-                alt="プロフィール画像"
-                fill
-                className="object-cover rounded-b-3xl"
-              />
+              <div className="h-full w-full bg-gray-200 flex items-center justify-center rounded-b-3xl">
+                <Camera className="h-12 w-12 text-gray-400" />
+              </div>
             )}
           </div>
 
@@ -224,13 +221,11 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-4 mb-2">
                       {dog.photos_urls && dog.photos_urls.length > 0 && !dogPhotoErrors[dog.id] ? (
                         <div className="relative w-16 h-16 rounded-full overflow-hidden">
-                          <Image
-                            src={fixImageUrl(dog.photos_urls[0])}
+                          <img
+                            src={fixImageUrl(dog.photos_urls[0]) || placeholderImage}
                             alt={dog.name}
-                            fill
-                            className="object-cover"
+                            className="w-full h-full object-cover"
                             onError={() => handleDogPhotoError(dog.id)}
-                            unoptimized={true}
                           />
                         </div>
                       ) : (
