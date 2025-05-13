@@ -22,35 +22,6 @@ export default function ProfileDetailPage() {
   );
 
   useEffect(() => {
-    // まだダミーデータを使用
-    const dummyProfile = {
-      id: 1,
-      name: '太郎',
-      age: 28,
-      avatar_url: '/placeholder-dog.jpg',
-      bio: '柴犬のポチと一緒に暮らしています。散歩が大好きです！',
-      prefecture: '東京都',
-      city: '渋谷区',
-      gender: 'male'
-    };
-    
-    const dummyDog = {
-      id: 1,
-      name: 'ポチ',
-      breed: '柴犬',
-      age_years: 3,
-      age_months: 6,
-      gender: 'male',
-      size: 'medium',
-      bio: '元気いっぱいで散歩が大好きです。他の犬とも仲良くできます。',
-      photos_urls: ['/placeholder-dog.jpg'],
-      is_vaccinated: true,
-      is_neutered_spayed: true,
-      temperament: ['フレンドリー', '活発', '社交的']
-    };
-    
-    // 実際のアプリではこのコメントアウトを外してSupabaseからデータを取得
-    /*
     const fetchProfileData = async () => {
       try {
         setIsLoading(true);
@@ -64,6 +35,25 @@ export default function ProfileDetailPage() {
 
         if (profileError) throw profileError;
 
+        // 年齢計算
+        let age = 0;
+        if (profileData.date_of_birth) {
+          const birthDate = new Date(profileData.date_of_birth);
+          const today = new Date();
+          age = today.getFullYear() - birthDate.getFullYear();
+          const m = today.getMonth() - birthDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+          }
+        }
+
+        // プロフィールデータを設定
+        setProfile({
+          ...profileData,
+          age,
+          name: profileData.username
+        });
+        
         // 犬の情報を取得
         const { data: dogsData, error: dogsError } = await supabase
           .from('dogs')
@@ -73,27 +63,29 @@ export default function ProfileDetailPage() {
 
         if (dogsError) throw dogsError;
         
-        setProfile(profileData);
-        
         if (dogsData && dogsData.length > 0) {
           setDog(dogsData[0]);
         }
         
       } catch (error) {
         console.error('Error fetching profile data:', error);
+        // エラー発生時はダミーデータを表示（オプション）
+        setProfile({
+          id: profileId,
+          name: 'ユーザー情報取得エラー',
+          age: 0,
+          avatar_url: '/placeholder-dog.jpg',
+          bio: 'プロフィールを読み込めませんでした。',
+          prefecture: '',
+          city: '',
+          gender: ''
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchProfileData();
-    */
-    
-    // ダミーデータを使用
-    setProfile(dummyProfile);
-    setDog(dummyDog);
-    setIsLoading(false);
-    
   }, [profileId]);
 
   const handleImageError = () => {
