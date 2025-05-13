@@ -800,7 +800,7 @@ export function RegistrationForm() {
                 >
                   <div className="w-12 h-12 rounded-full bg-gray-100 mr-4 overflow-hidden">
                     {dog.photos_urls && dog.photos_urls.length > 0 ? (
-                      <img src={fixImageUrl(dog.photos_urls[0])} alt={dog.name} className="w-full h-full object-cover" />
+                      <img src={fixImageUrl(dog.photos_urls[0])} alt={dog.name} className="w-full h-full object-cover" crossOrigin="anonymous" />
                     ) : (
                       <Dog className="w-full h-full p-2 text-gray-400" />
                     )}
@@ -861,7 +861,7 @@ export function RegistrationForm() {
                 <div className="flex justify-center mb-6">
                   <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                     {avatarUrl ? (
-                      <img src={fixImageUrl(avatarUrl)} alt="プロフィール画像" className="w-full h-full object-cover" />
+                      <img src={fixImageUrl(avatarUrl)} alt="プロフィール画像" className="w-full h-full object-cover" crossOrigin="anonymous" />
                     ) : (
                       <Camera className="w-8 h-8 text-gray-400" />
                     )}
@@ -1018,7 +1018,7 @@ export function RegistrationForm() {
                   <div className="flex justify-center mb-6">
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {dogPhotoUrl ? (
-                        <img src={fixImageUrl(dogPhotoUrl)} alt="愛犬の写真" className="w-full h-full object-cover" />
+                        <img src={fixImageUrl(dogPhotoUrl)} alt="愛犬の写真" className="w-full h-full object-cover" crossOrigin="anonymous" />
                       ) : (
                         <Upload className="w-8 h-8 text-gray-400" />
                       )}
@@ -1286,7 +1286,7 @@ export function RegistrationForm() {
                     </FormLabel>
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {idFrontUrl ? (
-                        <img src={fixImageUrl(idFrontUrl)} alt="身分証明書（表面）" className="w-full h-full object-contain" />
+                        <img src={fixImageUrl(idFrontUrl)} alt="身分証明書（表面）" className="w-full h-full object-contain" crossOrigin="anonymous" />
                       ) : (
                         <CreditCard className="w-12 h-12 text-gray-400" />
                       )}
@@ -1315,7 +1315,7 @@ export function RegistrationForm() {
                     </FormLabel>
                     <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {idBackUrl ? (
-                        <img src={fixImageUrl(idBackUrl)} alt="身分証明書（裏面）" className="w-full h-full object-contain" />
+                        <img src={fixImageUrl(idBackUrl)} alt="身分証明書（裏面）" className="w-full h-full object-contain" crossOrigin="anonymous" />
                       ) : (
                         <CreditCard className="w-12 h-12 text-gray-400" />
                       )}

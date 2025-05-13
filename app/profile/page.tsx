@@ -166,6 +166,7 @@ export default function ProfilePage() {
                 src={fixImageUrl(profile.avatar_url)}
                 alt={profile.username || 'プロフィール画像'}
                 className="h-full w-full object-cover rounded-b-3xl"
+                crossOrigin="anonymous"
                 onError={handleAvatarError}
               />
             ) : (
@@ -218,6 +219,7 @@ export default function ProfilePage() {
                             src={fixImageUrl(dog.photos_urls[0])}
                             alt={dog.name}
                             className="w-full h-full object-cover"
+                            crossOrigin="anonymous"
                             onError={(e) => handleDogPhotoError(dog.id, e)}
                           />
                         </div>

@@ -58,6 +58,7 @@ export default function DiscoveryPage() {
               src={fixImageUrl(currentProfile.image)}
               alt={currentProfile.dogName}
               className="w-full h-full object-cover"
+              crossOrigin="anonymous"
               onError={handleImageError}
             />
           ) : (

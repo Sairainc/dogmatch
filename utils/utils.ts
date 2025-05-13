@@ -36,10 +36,10 @@ export function fixImageUrl(url: string): string {
     return url;
   }
   
-  // Supabaseの完全なURLはプロキシを通す
+  // 本番環境のプロキシが利用できないため、直接URLを返す
   if (url.includes('supabase.co/storage')) {
-    console.log("Using proxy for URL:", url);
-    return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+    console.log("Direct URL access:", url);
+    return url;
   }
   
   // URLが既に他の完全な形式かチェック
@@ -56,8 +56,7 @@ export function fixImageUrl(url: string): string {
       : `${supabaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     
     console.log("Generated full URL:", fullUrl);
-    console.log("Using proxy for generated URL");
-    return `/api/image-proxy?url=${encodeURIComponent(fullUrl)}`;
+    return fullUrl;
   }
   
   return url;
