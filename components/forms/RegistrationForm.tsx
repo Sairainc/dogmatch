@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -63,6 +63,8 @@ export function RegistrationForm() {
   const [uploadingDog, setUploadingDog] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [dogPhotoUrl, setDogPhotoUrl] = useState<string | null>(null);
+  const [isFormMounted, setIsFormMounted] = useState(false);
+  
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -101,6 +103,28 @@ export function RegistrationForm() {
       temperament: [],
     },
   });
+
+  useEffect(() => {
+    if (step === 'dog') {
+      setIsFormMounted(true);
+      
+      dogForm.reset({
+        name: '',
+        breed: '',
+        age_years: 0,
+        age_months: 0,
+        gender: '',
+        size: '',
+        bio: '',
+        photos_urls: [],
+        is_vaccinated: false,
+        is_neutered_spayed: false,
+        temperament: [],
+      });
+      
+      setDogPhotoUrl(null);
+    }
+  }, [step, dogForm]);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -199,10 +223,6 @@ export function RegistrationForm() {
 
       if (error) throw error;
 
-      // ステップを犬情報入力に変更
-      setStep('dog');
-      
-      // dogFormをリセットして初期状態にする
       dogForm.reset({
         name: '',
         breed: '',
@@ -216,6 +236,12 @@ export function RegistrationForm() {
         is_neutered_spayed: false,
         temperament: [],
       });
+      
+      setIsFormMounted(false);
+      
+      setDogPhotoUrl(null);
+      
+      setStep('dog');
 
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -452,88 +478,44 @@ export function RegistrationForm() {
               </form>
             </Form>
           ) : (
-            <Form {...dogForm}>
-              <form onSubmit={dogForm.handleSubmit(onDogSubmit)} className="space-y-4">
-                <div className="flex justify-center mb-6">
-                  <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
-                    {dogPhotoUrl ? (
-                      <img src={dogPhotoUrl} alt="愛犬の写真" className="w-full h-full object-cover" />
-                    ) : (
-                      <Upload className="w-8 h-8 text-gray-400" />
-                    )}
-                    <input
-                      type="file"
-                      id="dogPhoto"
-                      accept="image/*"
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      onChange={handleDogPhotoUpload}
-                      disabled={uploadingDog}
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gray-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
-                      {uploadingDog ? '読込中...' : '愛犬の写真を選択'}
+            <div key={`dog-form-container-${isFormMounted ? 'mounted' : 'reset'}`}>
+              <Form {...dogForm}>
+                <form onSubmit={dogForm.handleSubmit(onDogSubmit)} className="space-y-4">
+                  <div className="flex justify-center mb-6">
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
+                      {dogPhotoUrl ? (
+                        <img src={dogPhotoUrl} alt="愛犬の写真" className="w-full h-full object-cover" />
+                      ) : (
+                        <Upload className="w-8 h-8 text-gray-400" />
+                      )}
+                      <input
+                        type="file"
+                        id="dogPhoto"
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={handleDogPhotoUpload}
+                        disabled={uploadingDog}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gray-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
+                        {uploadingDog ? '読込中...' : '愛犬の写真を選択'}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <FormField
-                  control={dogForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-gray-600">
-                        愛犬の名前 <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          value={field.value || ''}
-                          className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
-                          placeholder="例：ポチ"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={dogForm.control}
-                  name="breed"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-gray-600">
-                        犬種 <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field}
-                          value={field.value || ''}
-                          className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
-                          placeholder="例：柴犬"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={dogForm.control}
-                    name="age_years"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
-                          年齢（歳）<span className="text-red-500">*</span>
+                          愛犬の名前 <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
-                            min="0"
-                            {...field}
-                            value={field.value || 0}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            {...field} 
+                            value={field.value || ''}
                             className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
+                            placeholder="例：ポチ"
                           />
                         </FormControl>
                         <FormMessage className="text-red-500 text-xs" />
@@ -543,170 +525,216 @@ export function RegistrationForm() {
 
                   <FormField
                     control={dogForm.control}
-                    name="age_months"
+                    name="breed"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-gray-600">月齢</FormLabel>
+                        <FormLabel className="text-sm text-gray-600">
+                          犬種 <span className="text-red-500">*</span>
+                        </FormLabel>
                         <FormControl>
                           <Input 
-                            type="number" 
-                            min="0" 
-                            max="11"
                             {...field}
-                            value={field.value || 0}
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            value={field.value || ''}
                             className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
+                            placeholder="例：柴犬"
                           />
                         </FormControl>
                         <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={dogForm.control}
+                      name="age_years"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-gray-600">
+                            年齢（歳）<span className="text-red-500">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="0"
+                              {...field}
+                              value={field.value || 0}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={dogForm.control}
+                      name="age_months"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-gray-600">月齢</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="0" 
+                              max="11"
+                              {...field}
+                              value={field.value || 0}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
+                            />
+                          </FormControl>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={dogForm.control}
+                      name="gender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-gray-600">
+                            性別 <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
+                                <SelectValue placeholder="性別を選択" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="male">オス</SelectItem>
+                              <SelectItem value="female">メス</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={dogForm.control}
+                      name="size"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-gray-600">
+                            サイズ <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value || ''}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
+                                <SelectValue placeholder="サイズを選択" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="small">小型</SelectItem>
+                              <SelectItem value="medium">中型</SelectItem>
+                              <SelectItem value="large">大型</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={dogForm.control}
-                    name="gender"
+                    name="bio"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm text-gray-600">
-                          性別 <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ''}>
-                          <FormControl>
-                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
-                              <SelectValue placeholder="性別を選択" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="male">オス</SelectItem>
-                            <SelectItem value="female">メス</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormLabel className="text-sm text-gray-600">愛犬の紹介</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field}
+                            value={field.value || ''}
+                            className="bg-white border border-gray-300 rounded-md text-gray-800 min-h-[100px] px-4 py-3"
+                            placeholder="愛犬の性格や好きなこと、特徴などを書いてください"
+                          />
+                        </FormControl>
                         <FormMessage className="text-red-500 text-xs" />
                       </FormItem>
                     )}
                   />
 
-                  <FormField
-                    control={dogForm.control}
-                    name="size"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-gray-600">
-                          サイズ <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || ''}>
-                          <FormControl>
-                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
-                              <SelectValue placeholder="サイズを選択" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="small">小型</SelectItem>
-                            <SelectItem value="medium">中型</SelectItem>
-                            <SelectItem value="large">大型</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-500 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={dogForm.control}
+                      name="is_vaccinated"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-gray-600">
+                            ワクチン接種済み <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            value={String(field.value)}
+                            onValueChange={(val) => field.onChange(val === 'true')}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
+                                <SelectValue placeholder="選択してください" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">はい</SelectItem>
+                              <SelectItem value="false">いいえ</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={dogForm.control}
-                  name="bio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-gray-600">愛犬の紹介</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field}
-                          value={field.value || ''}
-                          className="bg-white border border-gray-300 rounded-md text-gray-800 min-h-[100px] px-4 py-3"
-                          placeholder="愛犬の性格や好きなこと、特徴などを書いてください"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={dogForm.control}
+                      name="is_neutered_spayed"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm text-gray-600">
+                            去勢・避妊済み <span className="text-red-500">*</span>
+                          </FormLabel>
+                          <Select
+                            value={String(field.value)}
+                            onValueChange={(val) => field.onChange(val === 'true')}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
+                                <SelectValue placeholder="選択してください" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">はい</SelectItem>
+                              <SelectItem value="false">いいえ</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-red-500 text-xs" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={dogForm.control}
-                    name="is_vaccinated"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-gray-600">
-                          ワクチン接種済み <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <Select
-                          value={String(field.value)}
-                          onValueChange={(val) => field.onChange(val === 'true')}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
-                              <SelectValue placeholder="選択してください" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="true">はい</SelectItem>
-                            <SelectItem value="false">いいえ</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-500 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={dogForm.control}
-                    name="is_neutered_spayed"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm text-gray-600">
-                          去勢・避妊済み <span className="text-red-500">*</span>
-                        </FormLabel>
-                        <Select
-                          value={String(field.value)}
-                          onValueChange={(val) => field.onChange(val === 'true')}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
-                              <SelectValue placeholder="選択してください" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="true">はい</SelectItem>
-                            <SelectItem value="false">いいえ</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-red-500 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="flex gap-4 mt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setStep('user')}
-                    className="w-full border-gray-300 text-gray-800 rounded-full"
-                  >
-                    戻る
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-full">
-                    {dogCount > 1 ? '次の愛犬を登録' : '登録完了'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
+                  <div className="flex gap-4 mt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep('user')}
+                      className="w-full border-gray-300 text-gray-800 rounded-full"
+                    >
+                      戻る
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-full">
+                      {dogCount > 1 ? '次の愛犬を登録' : '登録完了'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
           )}
         </CardContent>
       </Card>
