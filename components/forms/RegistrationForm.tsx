@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { Camera, Dog, Upload, UserCircle } from 'lucide-react';
 
@@ -63,7 +63,10 @@ export function RegistrationForm() {
   const [uploadingDog, setUploadingDog] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [dogPhotoUrl, setDogPhotoUrl] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const router = useRouter();
 
   const userForm = useForm<z.infer<typeof userSchema>>({
