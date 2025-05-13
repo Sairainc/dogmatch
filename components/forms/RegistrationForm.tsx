@@ -353,14 +353,14 @@ export function RegistrationForm() {
       const filePath = `${user.id}/id_front_${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('id_verification')
+        .from('idverification')
         .upload(filePath, file);
 
       if (uploadError) {
         throw uploadError;
       }
 
-      const { data } = supabase.storage.from('id_verification').getPublicUrl(filePath);
+      const { data } = supabase.storage.from('idverification').getPublicUrl(filePath);
       
       setIdFrontUrl(data.publicUrl);
       verificationForm.setValue('id_front_url', data.publicUrl);
@@ -387,14 +387,14 @@ export function RegistrationForm() {
       const filePath = `${user.id}/id_back_${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('id_verification')
+        .from('idverification')
         .upload(filePath, file);
 
       if (uploadError) {
         throw uploadError;
       }
 
-      const { data } = supabase.storage.from('id_verification').getPublicUrl(filePath);
+      const { data } = supabase.storage.from('idverification').getPublicUrl(filePath);
       
       setIdBackUrl(data.publicUrl);
       verificationForm.setValue('id_back_url', data.publicUrl);

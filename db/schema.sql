@@ -22,26 +22,32 @@ CREATE TABLE IF NOT EXISTS id_verification (
 -- 注：実際のSupabaseプロジェクトでは管理画面から作成するか、Supabase CLIを使用して作成します
 -- 以下はストレージバケットのポリシー設定例です
 
--- id_verificationバケットのRLSポリシー例（実際のSupabaseプロジェクトで実行）
+-- idverificationバケットのRLSポリシー例
 /*
--- ストレージバケット作成（CLIからの場合）
-INSERT INTO storage.buckets (id, name, public) VALUES ('id_verification', 'id_verification', FALSE);
+-- バケットが存在しない場合のみ作成（実際のプロジェクトではダッシュボードから作成済み）
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'idverification') THEN
+        INSERT INTO storage.buckets (id, name, public) VALUES ('idverification', 'idverification', FALSE);
+    END IF;
+END
+$$;
 
 -- 自分のIDカードを読み取るためのポリシー
 CREATE POLICY "Users can view their own ID documents" 
 ON storage.objects FOR SELECT 
-USING (bucket_id = 'id_verification' AND auth.uid()::text = (storage.foldername(name))[1]);
+USING (bucket_id = 'idverification' AND auth.uid()::text = (storage.foldername(name))[1]);
 
 -- 自分のIDカードをアップロードするためのポリシー
 CREATE POLICY "Users can upload their own ID documents" 
 ON storage.objects FOR INSERT 
-WITH CHECK (bucket_id = 'id_verification' AND auth.uid()::text = (storage.foldername(name))[1]);
+WITH CHECK (bucket_id = 'idverification' AND auth.uid()::text = (storage.foldername(name))[1]);
 
 -- 管理者のみが全てのIDを見れるポリシー（オプション）
 CREATE POLICY "Admins can view all ID documents" 
 ON storage.objects FOR SELECT 
 USING (
-  bucket_id = 'id_verification' AND 
+  bucket_id = 'idverification' AND 
   EXISTS (
     SELECT 1 FROM profiles 
     WHERE profiles.id = auth.uid() AND profiles.is_admin = TRUE
@@ -50,14 +56,18 @@ USING (
 */
 
 -- 身分証明書検証用のRLSポリシー
+/* 必要に応じて手動で実行してください
+-- 1. ユーザーが自分の検証データを閲覧できるポリシー
 CREATE POLICY "Users can view their own verification data"
 ON id_verification FOR SELECT
 USING (user_id = auth.uid());
 
+-- 2. ユーザーが自分の検証データを登録できるポリシー
 CREATE POLICY "Users can insert their own verification data"
 ON id_verification FOR INSERT
 WITH CHECK (user_id = auth.uid());
 
+-- 3. 管理者のみが検証ステータスを更新できるポリシー
 CREATE POLICY "Only admins can update verification status"
 ON id_verification FOR UPDATE
 USING (
@@ -72,6 +82,7 @@ WITH CHECK (
     WHERE profiles.id = auth.uid() AND profiles.is_admin = TRUE
   )
 );
+*/
 
 -- 管理者ユーザーを設定するためのSQLの例（必要に応じて実行）
 -- あなたのユーザーIDを指定して管理者権限を付与
