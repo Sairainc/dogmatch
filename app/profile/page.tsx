@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const [dogPhotoErrors, setDogPhotoErrors] = useState<{[key: string]: boolean}>({});
+  const [debugInfo, setDebugInfo] = useState<string>('');
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,6 +50,10 @@ export default function ProfilePage() {
 
         if (profileError) throw profileError;
 
+        // 画像URLをデバッグ
+        let debug = `Avatar URL: ${profileData.avatar_url}\n`;
+        console.log('Avatar URL:', profileData.avatar_url);
+
         // 犬の情報を取得
         const { data: dogsData, error: dogsError } = await supabase
           .from('dogs')
@@ -56,6 +61,21 @@ export default function ProfilePage() {
           .eq('owner_id', user.id);
 
         if (dogsError) throw dogsError;
+        
+        // 犬の画像URLをデバッグ
+        if (dogsData && dogsData.length > 0) {
+          debug += 'Dog photos:\n';
+          dogsData.forEach((dog, index) => {
+            if (dog.photos_urls && dog.photos_urls.length > 0) {
+              debug += `Dog ${index+1} (${dog.name}): ${dog.photos_urls[0]}\n`;
+              console.log(`Dog photo URL for ${dog.name}:`, dog.photos_urls[0]);
+            } else {
+              debug += `Dog ${index+1} (${dog.name}): No photos\n`;
+            }
+          });
+        }
+        
+        setDebugInfo(debug);
         
         // 年齢計算
         let age = 0;
@@ -80,6 +100,7 @@ export default function ProfilePage() {
         
       } catch (error) {
         console.error('Error fetching profile data:', error);
+        setDebugInfo(`Error: ${JSON.stringify(error)}`);
       } finally {
         setIsLoading(false);
       }
@@ -90,6 +111,25 @@ export default function ProfilePage() {
 
   const handleEditProfile = () => {
     router.push('/register');
+  };
+
+  // 画像URLを修正する関数
+  const fixImageUrl = (url: string) => {
+    if (!url) return '/placeholder-dog.jpg';
+    
+    // URLが既に正しいかチェック
+    if (url.startsWith('http') || url.startsWith('/')) {
+      return url;
+    }
+    
+    // SupabaseのストレージURLを正しく構築
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (url.includes('supabase') && !url.startsWith('http') && supabaseUrl) {
+      // URLを修復
+      return `${supabaseUrl}/storage/v1/object/public/${url}`;
+    }
+    
+    return url;
   };
 
   // 画像読み込みエラー時のハンドラー
@@ -128,12 +168,12 @@ export default function ProfilePage() {
           <div className="relative h-64">
             {!avatarError ? (
               <Image
-                src={profile.avatar_url || '/placeholder-dog.jpg'}
+                src={fixImageUrl(profile.avatar_url)}
                 alt={profile.username || 'プロフィール画像'}
                 fill
                 className="object-cover rounded-b-3xl"
                 onError={handleAvatarError}
-                unoptimized={profile.avatar_url?.includes('supabase')}
+                unoptimized={true}
               />
             ) : (
               <Image
@@ -167,6 +207,14 @@ export default function ProfilePage() {
               </div>
             )}
 
+            {/* デバッグ情報（開発時のみ表示） */}
+            {process.env.NODE_ENV === 'development' && debugInfo && (
+              <div className="mb-6 p-3 bg-gray-100 rounded text-xs font-mono overflow-x-auto">
+                <h3 className="font-bold mb-1">デバッグ情報:</h3>
+                <pre>{debugInfo}</pre>
+              </div>
+            )}
+
             {dogs.length > 0 && (
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold">愛犬の情報</h2>
@@ -177,12 +225,12 @@ export default function ProfilePage() {
                       {dog.photos_urls && dog.photos_urls.length > 0 && !dogPhotoErrors[dog.id] ? (
                         <div className="relative w-16 h-16 rounded-full overflow-hidden">
                           <Image
-                            src={dog.photos_urls[0]}
+                            src={fixImageUrl(dog.photos_urls[0])}
                             alt={dog.name}
                             fill
                             className="object-cover"
                             onError={() => handleDogPhotoError(dog.id)}
-                            unoptimized={dog.photos_urls[0]?.includes('supabase')}
+                            unoptimized={true}
                           />
                         </div>
                       ) : (

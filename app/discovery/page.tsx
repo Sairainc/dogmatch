@@ -39,6 +39,25 @@ export default function DiscoveryPage() {
     console.log("Profile image failed to load");
   };
 
+  // 画像URLを修正する関数
+  const fixImageUrl = (url: string) => {
+    if (!url) return '/placeholder-dog.jpg';
+    
+    // URLが既に正しいかチェック
+    if (url.startsWith('http') || url.startsWith('/')) {
+      return url;
+    }
+    
+    // SupabaseのストレージURLを正しく構築
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (url.includes('supabase') && !url.startsWith('http') && supabaseUrl) {
+      // URLを修復
+      return `${supabaseUrl}/storage/v1/object/public/${url}`;
+    }
+    
+    return url;
+  };
+
   if (currentIndex >= profiles.length) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -55,12 +74,12 @@ export default function DiscoveryPage() {
         <div className="relative flex-1 m-4 rounded-2xl overflow-hidden shadow-lg">
           {!imageError ? (
             <Image
-              src={currentProfile.image}
+              src={fixImageUrl(currentProfile.image)}
               alt={currentProfile.dogName}
               fill
               className="object-cover"
               onError={handleImageError}
-              unoptimized={currentProfile.image?.includes('supabase')}
+              unoptimized={true}
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">

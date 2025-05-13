@@ -291,7 +291,9 @@ export function RegistrationForm() {
         throw uploadError;
       }
 
+      // 完全なURLパスを生成
       const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
+      console.log('Generated avatar URL:', data.publicUrl);
       
       setAvatarUrl(data.publicUrl);
       userForm.setValue('avatar_url', data.publicUrl);
@@ -325,7 +327,9 @@ export function RegistrationForm() {
         throw uploadError;
       }
 
+      // 完全なURLパスを生成
       const { data } = supabase.storage.from('dogs').getPublicUrl(filePath);
+      console.log('Generated dog photo URL:', data.publicUrl);
       
       setDogPhotoUrl(data.publicUrl);
       const currentPhotos = dogForm.getValues('photos_urls') || [];
