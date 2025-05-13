@@ -485,9 +485,10 @@ export function RegistrationForm() {
                       </FormLabel>
                       <FormControl>
                         <Input 
+                          {...field} 
+                          value={field.value || ''}
                           className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：ポチ"
-                          {...field}
                         />
                       </FormControl>
                       <FormMessage className="text-red-500 text-xs" />
@@ -505,9 +506,10 @@ export function RegistrationForm() {
                       </FormLabel>
                       <FormControl>
                         <Input 
+                          {...field}
+                          value={field.value || ''}
                           className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：柴犬"
-                          {...field}
                         />
                       </FormControl>
                       <FormMessage className="text-red-500 text-xs" />
@@ -519,7 +521,7 @@ export function RegistrationForm() {
                   <FormField
                     control={dogForm.control}
                     name="age_years"
-                    render={({ field: { value, onChange, ...rest } }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
                           年齢（歳）<span className="text-red-500">*</span>
@@ -528,10 +530,10 @@ export function RegistrationForm() {
                           <Input 
                             type="number" 
                             min="0"
-                            value={value}
-                            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+                            {...field}
+                            value={field.value || 0}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
-                            {...rest}
                           />
                         </FormControl>
                         <FormMessage className="text-red-500 text-xs" />
@@ -542,7 +544,7 @@ export function RegistrationForm() {
                   <FormField
                     control={dogForm.control}
                     name="age_months"
-                    render={({ field: { value, onChange, ...rest } }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">月齢</FormLabel>
                         <FormControl>
@@ -550,10 +552,10 @@ export function RegistrationForm() {
                             type="number" 
                             min="0" 
                             max="11"
-                            value={value}
-                            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+                            {...field}
+                            value={field.value || 0}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
-                            {...rest}
                           />
                         </FormControl>
                         <FormMessage className="text-red-500 text-xs" />
@@ -571,7 +573,7 @@ export function RegistrationForm() {
                         <FormLabel className="text-sm text-gray-600">
                           性別 <span className="text-red-500">*</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                               <SelectValue placeholder="性別を選択" />
@@ -595,7 +597,7 @@ export function RegistrationForm() {
                         <FormLabel className="text-sm text-gray-600">
                           サイズ <span className="text-red-500">*</span>
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value || ''}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                           <FormControl>
                             <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
                               <SelectValue placeholder="サイズを選択" />
@@ -621,9 +623,10 @@ export function RegistrationForm() {
                       <FormLabel className="text-sm text-gray-600">愛犬の紹介</FormLabel>
                       <FormControl>
                         <Textarea 
+                          {...field}
+                          value={field.value || ''}
                           className="bg-white border border-gray-300 rounded-md text-gray-800 min-h-[100px] px-4 py-3"
                           placeholder="愛犬の性格や好きなこと、特徴などを書いてください"
-                          {...field}
                         />
                       </FormControl>
                       <FormMessage className="text-red-500 text-xs" />
@@ -635,14 +638,14 @@ export function RegistrationForm() {
                   <FormField
                     control={dogForm.control}
                     name="is_vaccinated"
-                    render={({ field: { value, onChange, ...rest } }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
                           ワクチン接種済み <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
-                          onValueChange={(val) => onChange(val === 'true')}
-                          defaultValue={String(value)}
+                          value={String(field.value)}
+                          onValueChange={(val) => field.onChange(val === 'true')}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
@@ -662,14 +665,14 @@ export function RegistrationForm() {
                   <FormField
                     control={dogForm.control}
                     name="is_neutered_spayed"
-                    render={({ field: { value, onChange, ...rest } }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm text-gray-600">
                           去勢・避妊済み <span className="text-red-500">*</span>
                         </FormLabel>
                         <Select
-                          onValueChange={(val) => onChange(val === 'true')}
-                          defaultValue={String(value)}
+                          value={String(field.value)}
+                          onValueChange={(val) => field.onChange(val === 'true')}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
