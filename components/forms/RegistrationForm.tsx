@@ -26,7 +26,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
-import { Camera, Dog, Upload, UserCircle } from 'lucide-react';
+import { Camera, Dog, Upload, UserCircle, CreditCard } from 'lucide-react';
 
 // バリデーションスキーマ
 const userSchema = z.object({
@@ -56,14 +56,29 @@ const dogSchema = z.object({
   temperament: z.array(z.string()).optional(),
 });
 
+// 身分証明書用のスキーマ
+const idVerificationSchema = z.object({
+  id_front_url: z.string().min(1, '身分証明書（表面）の写真は必須です'),
+  id_back_url: z.string().min(1, '身分証明書（裏面）の写真は必須です'),
+});
+
 export function RegistrationForm() {
-  const [step, setStep] = useState<'user' | 'dog'>('user');
+  const [step, setStep] = useState<'user' | 'dog' | 'verification'>('user');
   const [dogCount, setDogCount] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [uploadingDog, setUploadingDog] = useState(false);
+  const [uploadingIdFront, setUploadingIdFront] = useState(false);
+  const [uploadingIdBack, setUploadingIdBack] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [dogPhotoUrl, setDogPhotoUrl] = useState<string | null>(null);
+  const [idFrontUrl, setIdFrontUrl] = useState<string | null>(null);
+  const [idBackUrl, setIdBackUrl] = useState<string | null>(null);
   const [isFormMounted, setIsFormMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isProfileCompleted, setIsProfileCompleted] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [userDogs, setUserDogs] = useState<any[]>([]);
+  const [selectedDogId, setSelectedDogId] = useState<string | null>(null);
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -104,10 +119,118 @@ export function RegistrationForm() {
     },
   });
 
+  const verificationForm = useForm<z.infer<typeof idVerificationSchema>>({
+    resolver: zodResolver(idVerificationSchema),
+    defaultValues: {
+      id_front_url: '',
+      id_back_url: '',
+    },
+  });
+
+  // 初期ロード時にユーザーのプロフィール完了状態を確認
   useEffect(() => {
-    if (step === 'dog') {
+    const checkProfileStatus = async () => {
+      try {
+        setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          setIsLoading(false);
+          return;
+        }
+
+        // プロフィール情報の取得
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        // 犬の情報を取得
+        const { data: dogsData, error: dogsError } = await supabase
+          .from('dogs')
+          .select('*')
+          .eq('owner_id', user.id);
+
+        if (dogsError) throw dogsError;
+        
+        // 身分証明書の情報を取得
+        const { data: idVerificationData, error: idVerificationError } = await supabase
+          .from('id_verification')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        // プロフィールが完了しているかチェック
+        const isCompleted = profileData?.is_profile_completed && dogsData?.length > 0 && idVerificationData;
+        setIsProfileCompleted(isCompleted);
+
+        // データがある場合はフォームに設定
+        if (profileData) {
+          // ユーザーフォームの初期値を設定
+          Object.keys(userForm.getValues()).forEach(key => {
+            if (key in profileData && profileData[key] !== null) {
+              userForm.setValue(key as any, profileData[key]);
+            }
+          });
+          
+          if (profileData.avatar_url) {
+            setAvatarUrl(profileData.avatar_url);
+          }
+        }
+
+        // 犬のデータがある場合は保存
+        if (dogsData && dogsData.length > 0) {
+          setUserDogs(dogsData);
+        }
+
+        // 身分証明書データがある場合は設定
+        if (idVerificationData) {
+          verificationForm.setValue('id_front_url', idVerificationData.id_front_url || '');
+          verificationForm.setValue('id_back_url', idVerificationData.id_back_url || '');
+          setIdFrontUrl(idVerificationData.id_front_url);
+          setIdBackUrl(idVerificationData.id_back_url);
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error checking profile status:', error);
+        setIsLoading(false);
+      }
+    };
+
+    checkProfileStatus();
+  }, []);
+
+  // 犬のIDが選択されたら、そのデータをフォームに設定
+  useEffect(() => {
+    if (selectedDogId && userDogs.length > 0) {
+      const selectedDog = userDogs.find(dog => dog.id === selectedDogId);
+      if (selectedDog) {
+        // 犬フォームの初期値を設定
+        Object.keys(dogForm.getValues()).forEach(key => {
+          if (key in selectedDog && selectedDog[key] !== null) {
+            dogForm.setValue(key as any, selectedDog[key]);
+          }
+        });
+        
+        // 写真がある場合は設定
+        if (selectedDog.photos_urls && selectedDog.photos_urls.length > 0) {
+          setDogPhotoUrl(selectedDog.photos_urls[0]);
+        }
+      }
+    }
+  }, [selectedDogId, userDogs]);
+
+  // ステップ変更を監視して犬のフォームをリセット
+  useEffect(() => {
+    if (step === 'dog' && !isEditMode) {
+      // マウント状態を設定
       setIsFormMounted(true);
       
+      // 犬フォームをリセット
       dogForm.reset({
         name: '',
         breed: '',
@@ -122,9 +245,28 @@ export function RegistrationForm() {
         temperament: [],
       });
       
+      // 写真もリセット
       setDogPhotoUrl(null);
     }
-  }, [step, dogForm]);
+  }, [step, dogForm, isEditMode]);
+
+  // 編集モードを開始する関数
+  const startEditMode = () => {
+    setIsEditMode(true);
+    setStep('user');
+  };
+
+  // 編集完了時の関数
+  const completeEdit = () => {
+    setIsEditMode(false);
+    router.push('/discovery');
+  };
+
+  // 犬を選択する関数
+  const selectDogForEdit = (dogId: string) => {
+    setSelectedDogId(dogId);
+    setStep('dog');
+  };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -136,11 +278,9 @@ export function RegistrationForm() {
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       
-      // ユーザーIDを取得
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
       
-      // ユーザーIDを含めたファイルパスに変更
       const filePath = `${user.id}/${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
@@ -172,11 +312,9 @@ export function RegistrationForm() {
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       
-      // ユーザーIDを取得
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
       
-      // ユーザーIDを含めたファイルパスに変更
       const filePath = `${user.id}/${Math.random()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
@@ -196,6 +334,74 @@ export function RegistrationForm() {
       console.error('Error uploading dog photo:', error);
     } finally {
       setUploadingDog(false);
+    }
+  };
+
+  const handleIdFrontUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploadingIdFront(true);
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('画像を選択してください');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ユーザーが見つかりません');
+      
+      const filePath = `${user.id}/id_front_${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('id_verification')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from('id_verification').getPublicUrl(filePath);
+      
+      setIdFrontUrl(data.publicUrl);
+      verificationForm.setValue('id_front_url', data.publicUrl);
+    } catch (error) {
+      console.error('Error uploading ID front:', error);
+    } finally {
+      setUploadingIdFront(false);
+    }
+  };
+
+  const handleIdBackUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploadingIdBack(true);
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error('画像を選択してください');
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ユーザーが見つかりません');
+      
+      const filePath = `${user.id}/id_back_${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('id_verification')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from('id_verification').getPublicUrl(filePath);
+      
+      setIdBackUrl(data.publicUrl);
+      verificationForm.setValue('id_back_url', data.publicUrl);
+    } catch (error) {
+      console.error('Error uploading ID back:', error);
+    } finally {
+      setUploadingIdBack(false);
     }
   };
 
@@ -223,6 +429,12 @@ export function RegistrationForm() {
 
       if (error) throw error;
 
+      if (isEditMode) {
+        // 編集モードの場合は犬の選択画面へ
+        setStep('dog');
+        return;
+      }
+
       dogForm.reset({
         name: '',
         breed: '',
@@ -238,9 +450,7 @@ export function RegistrationForm() {
       });
       
       setIsFormMounted(false);
-      
       setDogPhotoUrl(null);
-      
       setStep('dog');
 
     } catch (error) {
@@ -253,6 +463,38 @@ export function RegistrationForm() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
 
+      if (isEditMode && selectedDogId) {
+        // 編集モードの場合は更新
+        const { error } = await supabase
+          .from('dogs')
+          .update({
+            ...data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', selectedDogId)
+          .eq('owner_id', user.id);
+
+        if (error) throw error;
+
+        // 犬の情報を再取得
+        const { data: dogsData } = await supabase
+          .from('dogs')
+          .select('*')
+          .eq('owner_id', user.id);
+
+        if (dogsData) setUserDogs(dogsData);
+
+        // 次のステップへ
+        if (isProfileCompleted) {
+          completeEdit();
+        } else {
+          setStep('verification');
+        }
+        
+        return;
+      }
+
+      // 通常の新規登録処理
       const { error } = await supabase
         .from('dogs')
         .insert({
@@ -279,26 +521,220 @@ export function RegistrationForm() {
           temperament: [],
         });
       } else {
-        // プロフィール完了フラグを設定
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            is_profile_completed: true,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-
-        if (profileError) {
-          console.error('Error updating profile completion status:', profileError);
-        }
-
-        // 登録完了後はdiscoveryページへリダイレクト
-        router.push('/discovery');
+        setStep('verification');
       }
     } catch (error) {
       console.error('Error creating dog profile:', error);
     }
   };
+
+  const onVerificationSubmit = async (data: z.infer<typeof idVerificationSchema>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('ユーザーが見つかりません');
+
+      // 既存の身分証明書情報を確認
+      const { data: existingVerification } = await supabase
+        .from('id_verification')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingVerification) {
+        // 既存データの更新
+        const { error: updateError } = await supabase
+          .from('id_verification')
+          .update({
+            id_front_url: data.id_front_url,
+            id_back_url: data.id_back_url,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingVerification.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // 新規データの挿入
+        const { error: insertError } = await supabase
+          .from('id_verification')
+          .insert({
+            user_id: user.id,
+            id_front_url: data.id_front_url,
+            id_back_url: data.id_back_url,
+            verified: false,
+            submitted_at: new Date().toISOString(),
+          });
+
+        if (insertError) throw insertError;
+      }
+
+      // プロフィール完了フラグを設定
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          is_profile_completed: true,
+          is_id_verified: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (profileError) {
+        console.error('Error updating profile completion status:', profileError);
+      }
+
+      // 登録完了後はdiscoveryページへリダイレクト
+      router.push('/discovery');
+    } catch (error) {
+      console.error('Error submitting ID verification:', error);
+    }
+  };
+
+  const getStepTitle = () => {
+    switch (step) {
+      case 'user':
+        return 'プロフィール登録';
+      case 'dog':
+        return '愛犬情報登録';
+      case 'verification':
+        return '身分証明書の提出';
+      default:
+        return '';
+    }
+  };
+
+  const getStepDescription = () => {
+    switch (step) {
+      case 'user':
+        return 'あなたについて教えてください';
+      case 'dog':
+        return '愛犬の情報を入力してください';
+      case 'verification':
+        return '安全なサービス提供のため、身分証明書の提出をお願いします';
+      default:
+        return '';
+    }
+  };
+
+  const getStepIcon = () => {
+    switch (step) {
+      case 'user':
+        return <UserCircle size={32} className="text-gray-700" />;
+      case 'dog':
+        return <Dog size={32} className="text-gray-700" />;
+      case 'verification':
+        return <CreditCard size={32} className="text-gray-700" />;
+      default:
+        return null;
+    }
+  };
+
+  // 読み込み中の表示
+  if (isLoading) {
+    return (
+      <div className="max-w-md mx-auto p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // プロフィール完了済みで編集モードでない場合は完了メッセージとボタンを表示
+  if (isProfileCompleted && !isEditMode) {
+    return (
+      <div className="max-w-md mx-auto">
+        <Card className="border-0 rounded-3xl overflow-hidden shadow-md">
+          <div className="bg-gray-100 p-6 text-center text-gray-800">
+            <div className="flex justify-center mb-3">
+              <div className="rounded-full bg-white bg-opacity-20 p-4">
+                <UserCircle size={32} className="text-gray-700" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold">プロフィール完了</h2>
+            <p className="text-sm mt-1 text-gray-600">
+              すべての登録情報が完了しています
+            </p>
+          </div>
+          <CardContent className="p-6 bg-white">
+            <div className="text-center">
+              <p className="mb-6 text-gray-600">
+                プロフィール情報と愛犬情報の登録が完了しています。編集が必要な場合は下のボタンをクリックしてください。
+              </p>
+              <Button
+                onClick={startEditMode}
+                className="bg-gray-800 hover:bg-gray-900 text-white rounded-full py-3 px-6"
+              >
+                プロフィールを編集する
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 編集モードで犬の選択画面
+  if (isEditMode && step === 'dog' && !selectedDogId && userDogs.length > 0) {
+    return (
+      <div className="max-w-md mx-auto">
+        <Card className="border-0 rounded-3xl overflow-hidden shadow-md">
+          <div className="bg-gray-100 p-6 text-center text-gray-800">
+            <div className="flex justify-center mb-3">
+              <div className="rounded-full bg-white bg-opacity-20 p-4">
+                <Dog size={32} className="text-gray-700" />
+              </div>
+            </div>
+            <h2 className="text-xl font-bold">愛犬情報の編集</h2>
+            <p className="text-sm mt-1 text-gray-600">
+              編集する愛犬を選択してください
+            </p>
+          </div>
+          <CardContent className="p-6 bg-white">
+            <div className="space-y-4">
+              {userDogs.map(dog => (
+                <div
+                  key={dog.id}
+                  onClick={() => selectDogForEdit(dog.id)}
+                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer flex items-center"
+                >
+                  <div className="w-12 h-12 rounded-full bg-gray-100 mr-4 overflow-hidden">
+                    {dog.photos_urls && dog.photos_urls.length > 0 ? (
+                      <img src={dog.photos_urls[0]} alt={dog.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Dog className="w-full h-full p-2 text-gray-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{dog.name}</h3>
+                    <p className="text-sm text-gray-500">{dog.breed}</p>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="flex gap-4 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep('user')}
+                  className="w-full border-gray-300 text-gray-800 rounded-full"
+                >
+                  戻る
+                </Button>
+                {isProfileCompleted && (
+                  <Button
+                    onClick={completeEdit}
+                    className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-full"
+                  >
+                    編集を終了
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto">
@@ -306,17 +742,14 @@ export function RegistrationForm() {
         <div className="bg-gray-100 p-6 text-center text-gray-800">
           <div className="flex justify-center mb-3">
             <div className="rounded-full bg-white bg-opacity-20 p-4">
-              {step === 'user' 
-                ? <UserCircle size={32} className="text-gray-700" />
-                : <Dog size={32} className="text-gray-700" />
-              }
+              {getStepIcon()}
             </div>
           </div>
           <h2 className="text-xl font-bold">
-            {step === 'user' ? 'プロフィール登録' : '愛犬情報登録'}
+            {getStepTitle()}
           </h2>
           <p className="text-sm mt-1 text-gray-600">
-            {step === 'user' ? 'あなたについて教えてください' : '愛犬の情報を入力してください'}
+            {getStepDescription()}
           </p>
         </div>
 
@@ -477,7 +910,7 @@ export function RegistrationForm() {
                 </Button>
               </form>
             </Form>
-          ) : (
+          ) : step === 'dog' ? (
             <div key={`dog-form-container-${isFormMounted ? 'mounted' : 'reset'}`}>
               <Form {...dogForm}>
                 <form onSubmit={dogForm.handleSubmit(onDogSubmit)} className="space-y-4">
@@ -735,6 +1168,93 @@ export function RegistrationForm() {
                 </form>
               </Form>
             </div>
+          ) : (
+            <Form {...verificationForm}>
+              <form onSubmit={verificationForm.handleSubmit(onVerificationSubmit)} className="space-y-4">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-4">
+                    ユーザーの安全確保のため、身分証明書の提出をお願いしています。
+                    提出された情報は厳重に管理され、身分確認以外の目的には使用されません。
+                  </p>
+                </div>
+                
+                <div className="flex flex-col space-y-6">
+                  <div>
+                    <FormLabel className="text-sm text-gray-600 block mb-2">
+                      身分証明書（表面） <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
+                      {idFrontUrl ? (
+                        <img src={idFrontUrl} alt="身分証明書（表面）" className="w-full h-full object-contain" />
+                      ) : (
+                        <CreditCard className="w-12 h-12 text-gray-400" />
+                      )}
+                      <input
+                        type="file"
+                        id="idFront"
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={handleIdFrontUpload}
+                        disabled={uploadingIdFront}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gray-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
+                        {uploadingIdFront ? '読込中...' : '表面の写真を選択'}
+                      </div>
+                    </div>
+                    {verificationForm.formState.errors.id_front_url && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {verificationForm.formState.errors.id_front_url.message}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <FormLabel className="text-sm text-gray-600 block mb-2">
+                      身分証明書（裏面） <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
+                      {idBackUrl ? (
+                        <img src={idBackUrl} alt="身分証明書（裏面）" className="w-full h-full object-contain" />
+                      ) : (
+                        <CreditCard className="w-12 h-12 text-gray-400" />
+                      )}
+                      <input
+                        type="file"
+                        id="idBack"
+                        accept="image/*"
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={handleIdBackUpload}
+                        disabled={uploadingIdBack}
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gray-500 bg-opacity-80 text-white text-xs font-medium text-center py-1">
+                        {uploadingIdBack ? '読込中...' : '裏面の写真を選択'}
+                      </div>
+                    </div>
+                    {verificationForm.formState.errors.id_back_url && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {verificationForm.formState.errors.id_back_url.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setStep('dog')}
+                    className="w-full border-gray-300 text-gray-800 rounded-full"
+                  >
+                    戻る
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gray-800 hover:bg-gray-900 text-white rounded-full">
+                    登録完了
+                  </Button>
+                </div>
+              </form>
+            </Form>
           )}
         </CardContent>
       </Card>
