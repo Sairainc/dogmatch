@@ -18,6 +18,7 @@ export function encodedRedirect(
 /**
  * 画像URLを修正し、正しい形式に変換します。
  * Supabaseのストレージから取得したURLが不完全な場合に修正します。
+ * CORS問題を回避するためにプロキシを使用します。
  * 
  * @param {string} url - 修正したい画像URL
  * @returns {string} 修正されたURL
@@ -30,36 +31,33 @@ export function fixImageUrl(url: string): string {
   
   if (!url) return placeholderSvg;
   
-  // Supabaseの完全なURLを直接クロスオリジンプロキシで処理
-  if (url.includes('supabase.co/storage')) {
-    // CORSを回避するために直接URLを返す
-    return url;
-  }
-  
-  // URLが既に完全な形式かチェック
-  if (url.startsWith('http') || url.startsWith('data:')) {
-    return url;
-  }
-  
   // ローカルパスの場合はそのまま返す
   if (url.startsWith('/')) {
     return url;
   }
   
+  // Supabaseの完全なURLはプロキシを通す
+  if (url.includes('supabase.co/storage')) {
+    console.log("Using proxy for URL:", url);
+    return `/api/image-proxy?url=${encodeURIComponent(url)}`;
+  }
+  
+  // URLが既に他の完全な形式かチェック
+  if (url.startsWith('http') || url.startsWith('data:')) {
+    return url;
+  }
+  
   // Supabaseのストレージ関連の修正
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (supabaseUrl && (url.includes('supabase') || url.includes('storage'))) {
+  if (supabaseUrl && (url.includes('supabase') || url.includes('storage') || url.includes('/'))) {
     // URLにバケット名とパスが含まれているか確認
-    if (url.includes('/')) {
-      const fullUrl = `${supabaseUrl}/storage/v1/object/public/${url}`;
-      console.log("Generated full URL:", fullUrl);
-      return fullUrl;
-    }
+    const fullUrl = url.includes('/') 
+      ? `${supabaseUrl}/storage/v1/object/public/${url}`
+      : `${supabaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     
-    // 完全なパスでない場合は、単純にURLを連結
-    const combinedUrl = `${supabaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-    console.log("Combined URL:", combinedUrl);
-    return combinedUrl;
+    console.log("Generated full URL:", fullUrl);
+    console.log("Using proxy for generated URL");
+    return `/api/image-proxy?url=${encodeURIComponent(fullUrl)}`;
   }
   
   return url;
