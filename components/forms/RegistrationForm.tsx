@@ -350,22 +350,29 @@ export function RegistrationForm() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
       
-      const filePath = `${user.id}/id_front_${Math.random()}.${fileExt}`;
+      // RLSポリシーに合わせてユーザーIDをパスの最初に配置
+      const fileName = `id_front_${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+      
+      console.log('Uploading ID front to:', filePath);
       
       const { error: uploadError } = await supabase.storage
         .from('idverification')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error('Storage upload error details:', uploadError);
         throw uploadError;
       }
 
       const { data } = supabase.storage.from('idverification').getPublicUrl(filePath);
+      console.log('Public URL generated:', data.publicUrl);
       
       setIdFrontUrl(data.publicUrl);
       verificationForm.setValue('id_front_url', data.publicUrl);
     } catch (error) {
       console.error('Error uploading ID front:', error);
+      alert('身分証明書（表面）のアップロードに失敗しました。もう一度お試しください。');
     } finally {
       setUploadingIdFront(false);
     }
@@ -384,22 +391,29 @@ export function RegistrationForm() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
       
-      const filePath = `${user.id}/id_back_${Math.random()}.${fileExt}`;
+      // RLSポリシーに合わせてユーザーIDをパスの最初に配置
+      const fileName = `id_back_${Math.random()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+      
+      console.log('Uploading ID back to:', filePath);
       
       const { error: uploadError } = await supabase.storage
         .from('idverification')
         .upload(filePath, file);
 
       if (uploadError) {
+        console.error('Storage upload error details:', uploadError);
         throw uploadError;
       }
 
       const { data } = supabase.storage.from('idverification').getPublicUrl(filePath);
+      console.log('Public URL generated:', data.publicUrl);
       
       setIdBackUrl(data.publicUrl);
       verificationForm.setValue('id_back_url', data.publicUrl);
     } catch (error) {
       console.error('Error uploading ID back:', error);
+      alert('身分証明書（裏面）のアップロードに失敗しました。もう一度お試しください。');
     } finally {
       setUploadingIdBack(false);
     }
