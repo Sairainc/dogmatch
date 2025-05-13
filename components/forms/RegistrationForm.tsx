@@ -628,17 +628,20 @@ export function RegistrationForm() {
         .maybeSingle();
 
       if (existingVerification) {
-        // 既存データの更新
+        // 既存データの更新（updated_at カラムなしで対応）
         const { error: updateError } = await supabase
           .from('id_verification')
           .update({
             id_front_url: data.id_front_url,
             id_back_url: data.id_back_url,
-            updated_at: new Date().toISOString(),
+            // updated_at フィールドは削除
           })
           .eq('id', existingVerification.id);
 
-        if (updateError) throw updateError;
+        if (updateError) {
+          console.error('Update error details:', updateError);
+          throw updateError;
+        }
       } else {
         // 新規データの挿入
         const { error: insertError } = await supabase
@@ -649,9 +652,13 @@ export function RegistrationForm() {
             id_back_url: data.id_back_url,
             verified: false,
             submitted_at: new Date().toISOString(),
+            // updated_at は必要なければ削除
           });
 
-        if (insertError) throw insertError;
+        if (insertError) {
+          console.error('Insert error details:', insertError);
+          throw insertError;
+        }
       }
 
       // プロフィール完了フラグを設定
@@ -668,10 +675,12 @@ export function RegistrationForm() {
         console.error('Error updating profile completion status:', profileError);
       }
 
+      console.log('身分証明書の登録が完了しました。ディスカバリーページに移動します。');
       // 登録完了後はdiscoveryページへリダイレクト
       router.push('/discovery');
     } catch (error) {
       console.error('Error submitting ID verification:', error);
+      alert('身分証明書の登録に失敗しました。もう一度お試しください。');
     }
   };
 
