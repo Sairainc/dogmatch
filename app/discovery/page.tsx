@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Heart, X } from 'lucide-react';
+import { Heart, X, Camera } from 'lucide-react';
 
 export default function DiscoveryPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
   
   // ダミーデータ
   const profiles = [
@@ -24,11 +25,18 @@ export default function DiscoveryPage() {
   const handleLike = () => {
     // Likeの処理
     setCurrentIndex(prev => prev + 1);
+    setImageError(false); // 次のカードに移るときにエラー状態をリセット
   };
 
   const handleDislike = () => {
     // Dislikeの処理
     setCurrentIndex(prev => prev + 1);
+    setImageError(false); // 次のカードに移るときにエラー状態をリセット
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+    console.log("Profile image failed to load");
   };
 
   if (currentIndex >= profiles.length) {
@@ -45,12 +53,21 @@ export default function DiscoveryPage() {
     <div className="relative h-screen bg-gray-100">
       <div className="max-w-md mx-auto h-full flex flex-col">
         <div className="relative flex-1 m-4 rounded-2xl overflow-hidden shadow-lg">
-          <Image
-            src={currentProfile.image}
-            alt={currentProfile.dogName}
-            fill
-            className="object-cover"
-          />
+          {!imageError ? (
+            <Image
+              src={currentProfile.image}
+              alt={currentProfile.dogName}
+              fill
+              className="object-cover"
+              onError={handleImageError}
+              unoptimized={currentProfile.image?.includes('supabase')}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex flex-col items-center justify-center">
+              <Camera className="w-16 h-16 text-gray-400 mb-2" />
+              <p className="text-gray-500">画像を読み込めませんでした</p>
+            </div>
+          )}
           <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white">
             <h2 className="text-2xl font-bold">{currentProfile.name}, {currentProfile.age}</h2>
             <p className="text-lg">{currentProfile.dogName} ({currentProfile.dogBreed})</p>

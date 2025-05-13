@@ -20,6 +20,8 @@ export default function ProfilePage() {
   
   const [dogs, setDogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [avatarError, setAvatarError] = useState(false);
+  const [dogPhotoErrors, setDogPhotoErrors] = useState<{[key: string]: boolean}>({});
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -90,6 +92,17 @@ export default function ProfilePage() {
     router.push('/register');
   };
 
+  // 画像読み込みエラー時のハンドラー
+  const handleAvatarError = () => {
+    setAvatarError(true);
+    console.log("Avatar image failed to load");
+  };
+
+  const handleDogPhotoError = (dogId: string) => {
+    setDogPhotoErrors(prev => ({...prev, [dogId]: true}));
+    console.log(`Dog photo for dog ${dogId} failed to load`);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -113,12 +126,23 @@ export default function ProfilePage() {
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-b-3xl shadow-lg">
           <div className="relative h-64">
-            <Image
-              src={profile.avatar_url || '/placeholder-dog.jpg'}
-              alt={profile.username || 'プロフィール画像'}
-              fill
-              className="object-cover rounded-b-3xl"
-            />
+            {!avatarError ? (
+              <Image
+                src={profile.avatar_url || '/placeholder-dog.jpg'}
+                alt={profile.username || 'プロフィール画像'}
+                fill
+                className="object-cover rounded-b-3xl"
+                onError={handleAvatarError}
+                unoptimized={profile.avatar_url?.includes('supabase')}
+              />
+            ) : (
+              <Image
+                src="/placeholder-dog.jpg"
+                alt="プロフィール画像"
+                fill
+                className="object-cover rounded-b-3xl"
+              />
+            )}
           </div>
 
           <div className="p-6">
@@ -150,16 +174,22 @@ export default function ProfilePage() {
                 {dogs.map((dog) => (
                   <div key={dog.id} className="bg-gray-50 rounded-xl p-4 mb-4">
                     <div className="flex items-center gap-4 mb-2">
-                      {dog.photos_urls && dog.photos_urls.length > 0 ? (
+                      {dog.photos_urls && dog.photos_urls.length > 0 && !dogPhotoErrors[dog.id] ? (
                         <div className="relative w-16 h-16 rounded-full overflow-hidden">
                           <Image
                             src={dog.photos_urls[0]}
                             alt={dog.name}
                             fill
                             className="object-cover"
+                            onError={() => handleDogPhotoError(dog.id)}
+                            unoptimized={dog.photos_urls[0]?.includes('supabase')}
                           />
                         </div>
-                      ) : null}
+                      ) : (
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
                       <div>
                         <h3 className="font-medium text-lg">{dog.name}</h3>
                         <p className="text-gray-500">{dog.breed}</p>
