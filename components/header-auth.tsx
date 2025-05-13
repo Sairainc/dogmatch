@@ -21,7 +21,7 @@ export default async function AuthButton() {
               variant={"default"}
               className="font-normal pointer-events-none"
             >
-              環境変数の設定が必要です
+              環境変数の設定が必要です。
             </Badge>
           </div>
           <div className="flex gap-2">
