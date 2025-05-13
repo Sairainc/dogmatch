@@ -15,6 +15,10 @@ export default function DiscoveryPage() {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [matchedProfile, setMatchedProfile] = useState<any>(null);
+  
   const cardRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   
@@ -57,6 +61,17 @@ export default function DiscoveryPage() {
           oppositeGender = null;
         }
 
+        // 既にLikeした相手のIDリストを取得
+        const { data: likedUsers, error: likedError } = await supabase
+          .from('likes')
+          .select('liked_id')
+          .eq('liker_id', user.id);
+
+        if (likedError) throw likedError;
+
+        // likedUsersからIDのみの配列を作成
+        const likedUserIds = likedUsers ? likedUsers.map(like => like.liked_id) : [];
+
         let query = supabase
           .from('profiles')
           .select(`
@@ -85,6 +100,11 @@ export default function DiscoveryPage() {
         // 性別でフィルタリング
         if (oppositeGender) {
           query = query.eq('gender', oppositeGender);
+        }
+
+        // 既にLikeした相手を除外
+        if (likedUserIds.length > 0) {
+          query = query.not('id', 'in', `(${likedUserIds.join(',')})`);
         }
 
         const { data: matchProfiles, error: matchError } = await query;
@@ -135,13 +155,92 @@ export default function DiscoveryPage() {
     fetchData();
   }, []);
 
-  const handleLike = () => {
-    // Likeの処理
-    animateSwipe('right');
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1);
-      resetSwipeState();
-    }, 300);
+  const createMatch = async (user1Id: string, user2Id: string) => {
+    // IDが小さい方をuser1_id、大きい方をuser2_idにする（一貫性のため）
+    const [smallerId, largerId] = user1Id < user2Id 
+      ? [user1Id, user2Id] 
+      : [user2Id, user1Id];
+
+    const { data, error } = await supabase
+      .from('matches')
+      .insert({
+        user1_id: smallerId,
+        user2_id: largerId,
+        created_at: new Date().toISOString(),
+        last_message_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating match:', error);
+      return null;
+    }
+
+    return data;
+  };
+
+  const checkForMatch = async (likedUserId: string) => {
+    if (!currentUser) return false;
+
+    // 相手が自分にLikeしているかチェック
+    const { data, error } = await supabase
+      .from('likes')
+      .select('*')
+      .eq('liker_id', likedUserId)
+      .eq('liked_id', currentUser.id)
+      .single();
+
+    if (error || !data) {
+      return false;
+    }
+
+    // マッチングが成立
+    const match = await createMatch(currentUser.id, likedUserId);
+    return !!match;
+  };
+
+  const handleLike = async () => {
+    if (isProcessingAction || currentIndex >= profiles.length) return;
+
+    setIsProcessingAction(true);
+    const likedProfile = profiles[currentIndex];
+
+    try {
+      // データベースにLikeを記録
+      const { error } = await supabase
+        .from('likes')
+        .insert({
+          liker_id: currentUser.id,
+          liked_id: likedProfile.id,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error saving like:', error);
+        throw error;
+      }
+
+      // マッチングをチェック
+      const isMatch = await checkForMatch(likedProfile.id);
+
+      if (isMatch) {
+        // マッチング成立
+        setMatchedProfile(likedProfile);
+        setShowMatchModal(true);
+      } else {
+        // 通常通り次のプロフィールへ
+        animateSwipe('right');
+        setTimeout(() => {
+          setCurrentIndex(prev => prev + 1);
+          resetSwipeState();
+          setIsProcessingAction(false);
+        }, 300);
+      }
+    } catch (error) {
+      console.error('Error in handleLike:', error);
+      setIsProcessingAction(false);
+    }
   };
 
   const handleDislike = () => {
@@ -316,6 +415,7 @@ export default function DiscoveryPage() {
             onClick={handleDislike}
             className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center"
             aria-label="Dislike"
+            disabled={isProcessingAction}
           >
             <X className="w-7 h-7 text-red-500" />
           </button>
@@ -323,11 +423,65 @@ export default function DiscoveryPage() {
             onClick={handleLike}
             className="w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center"
             aria-label="Like"
+            disabled={isProcessingAction}
           >
             <Heart className="w-7 h-7 text-pink-500" />
           </button>
         </div>
       </div>
+
+      {/* マッチング成立モーダル */}
+      {showMatchModal && matchedProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 text-center">
+            <h2 className="text-2xl font-bold text-pink-500 mb-4">マッチング成立！</h2>
+            <p className="mb-6">あなたと{matchedProfile.name}さんがお互いにLikeしました！</p>
+            
+            <div className="flex justify-center gap-4 mb-6">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-500">
+                <img 
+                  src={fixImageUrl(currentUser.avatar_url)} 
+                  alt={currentUser.username} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder-profile.jpg';
+                  }}
+                />
+              </div>
+              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-500">
+                <img 
+                  src={fixImageUrl(matchedProfile.image)} 
+                  alt={matchedProfile.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder-profile.jpg';
+                  }}
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => router.push('/matches')}
+                className="bg-pink-500 text-white py-3 px-6 rounded-full font-semibold hover:bg-pink-600 transition-colors"
+              >
+                マッチページへ
+              </button>
+              <button 
+                onClick={() => {
+                  setShowMatchModal(false);
+                  setCurrentIndex(prev => prev + 1);
+                  resetSwipeState();
+                  setIsProcessingAction(false);
+                }}
+                className="bg-gray-200 text-gray-800 py-3 px-6 rounded-full font-semibold hover:bg-gray-300 transition-colors"
+              >
+                続けて探す
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

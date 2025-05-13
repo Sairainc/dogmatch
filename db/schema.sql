@@ -18,6 +18,35 @@ CREATE TABLE IF NOT EXISTS id_verification (
   admin_user_id UUID REFERENCES auth.users(id)
 );
 
+-- いいね情報用のテーブル
+CREATE TABLE IF NOT EXISTS likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  liker_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  liked_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(liker_id, liked_id)
+);
+
+-- マッチング情報用のテーブル
+CREATE TABLE IF NOT EXISTS matches (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user1_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user2_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user1_id, user2_id)
+);
+
+-- メッセージ情報用のテーブル
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  match_id UUID NOT NULL REFERENCES matches(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_read BOOLEAN DEFAULT FALSE
+);
+
 -- ストレージバケット作成用のSQL
 -- 注：実際のSupabaseプロジェクトでは管理画面から作成するか、Supabase CLIを使用して作成します
 -- 以下はストレージバケットのポリシー設定例です
@@ -83,6 +112,40 @@ WITH CHECK (
   )
 );
 */
+
+-- likes テーブルのRLS設定
+CREATE POLICY "Users can insert their own likes"
+ON likes FOR INSERT
+WITH CHECK (liker_id = auth.uid());
+
+CREATE POLICY "Users can view their own likes"
+ON likes FOR SELECT
+USING (liker_id = auth.uid() OR liked_id = auth.uid());
+
+-- matches テーブルのRLS設定
+CREATE POLICY "Users can view their own matches"
+ON matches FOR SELECT
+USING (user1_id = auth.uid() OR user2_id = auth.uid());
+
+-- messages テーブルのRLS設定
+CREATE POLICY "Users can insert messages to their matches"
+ON messages FOR INSERT
+WITH CHECK (
+  sender_id = auth.uid() AND
+  EXISTS (
+    SELECT 1 FROM matches 
+    WHERE id = match_id AND (user1_id = auth.uid() OR user2_id = auth.uid())
+  )
+);
+
+CREATE POLICY "Users can view messages from their matches"
+ON messages FOR SELECT
+USING (
+  EXISTS (
+    SELECT 1 FROM matches 
+    WHERE id = match_id AND (user1_id = auth.uid() OR user2_id = auth.uid())
+  )
+);
 
 -- 管理者ユーザーを設定するためのSQLの例（必要に応じて実行）
 -- あなたのユーザーIDを指定して管理者権限を付与
