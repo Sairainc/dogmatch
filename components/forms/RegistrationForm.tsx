@@ -468,6 +468,7 @@ export function RegistrationForm() {
                       <FormControl>
                         <Input 
                           {...field}
+                          value={field.value || ''}
                           className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：ポチ"
                         />
@@ -488,6 +489,7 @@ export function RegistrationForm() {
                       <FormControl>
                         <Input 
                           {...field}
+                          value={field.value || ''}
                           className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           placeholder="例：柴犬"
                         />
@@ -509,8 +511,8 @@ export function RegistrationForm() {
                         <FormControl>
                           <Input 
                             type="number" 
-                            min="0" 
-                            {...field}
+                            min="0"
+                            value={field.value || 0}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           />
@@ -530,8 +532,8 @@ export function RegistrationForm() {
                           <Input 
                             type="number" 
                             min="0" 
-                            max="11" 
-                            {...field}
+                            max="11"
+                            value={field.value || 0}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4"
                           />
@@ -602,6 +604,7 @@ export function RegistrationForm() {
                       <FormControl>
                         <Textarea 
                           {...field}
+                          value={field.value || ''}
                           className="bg-white border border-gray-300 rounded-md text-gray-800 min-h-[100px] px-4 py-3"
                           placeholder="愛犬の性格や好きなこと、特徴などを書いてください"
                         />
@@ -622,7 +625,7 @@ export function RegistrationForm() {
                         </FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value === 'true')}
-                          defaultValue={field.value?.toString()}
+                          defaultValue={String(field.value)}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
@@ -649,7 +652,7 @@ export function RegistrationForm() {
                         </FormLabel>
                         <Select
                           onValueChange={(value) => field.onChange(value === 'true')}
-                          defaultValue={field.value?.toString()}
+                          defaultValue={String(field.value)}
                         >
                           <FormControl>
                             <SelectTrigger className="bg-white border border-gray-300 rounded-md text-gray-800 h-12 px-4">
