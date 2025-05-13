@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { Heart, X, Camera } from 'lucide-react';
 import { fixImageUrl } from '@/utils/utils';
+import { useRouter } from 'next/navigation';
 
 export default function DiscoveryPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
+  const router = useRouter();
   
   // ダミーデータ
   const profiles = [
@@ -38,6 +40,13 @@ export default function DiscoveryPage() {
     setImageError(true);
   };
 
+  const handleCardClick = () => {
+    // カードがタップされたら詳細ページに遷移
+    if (currentIndex < profiles.length) {
+      router.push(`/discovery/${profiles[currentIndex].id}`);
+    }
+  };
+
   if (currentIndex >= profiles.length) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -51,7 +60,10 @@ export default function DiscoveryPage() {
   return (
     <div className="relative h-screen bg-gray-100">
       <div className="max-w-md mx-auto h-full flex flex-col">
-        <div className="relative flex-1 m-4 rounded-2xl overflow-hidden shadow-lg">
+        <div 
+          className="relative flex-1 m-4 rounded-2xl overflow-hidden shadow-lg cursor-pointer"
+          onClick={handleCardClick}
+        >
           {!imageError ? (
             <img
               src={fixImageUrl(currentProfile.image)}
