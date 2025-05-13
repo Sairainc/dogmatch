@@ -410,24 +410,59 @@ export function RegistrationForm() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
 
-      const { error } = await supabase
+      // プロフィールがすでに存在するか確認
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .update({
-          username: data.username,
-          bio: data.bio,
-          date_of_birth: data.date_of_birth,
-          gender: data.gender,
-          prefecture: data.prefecture,
-          city: data.city,
-          dog_owner_experience: data.dog_owner_experience,
-          avatar_url: data.avatar_url,
-          preferred_dog_breeds: data.preferred_dog_breeds,
-          preferred_dog_sizes: data.preferred_dog_sizes,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', user.id);
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      let profileError;
+
+      if (existingProfile) {
+        // 既存のプロフィールを更新
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            username: data.username,
+            bio: data.bio,
+            date_of_birth: data.date_of_birth,
+            gender: data.gender,
+            prefecture: data.prefecture,
+            city: data.city,
+            dog_owner_experience: data.dog_owner_experience,
+            avatar_url: data.avatar_url,
+            preferred_dog_breeds: data.preferred_dog_breeds,
+            preferred_dog_sizes: data.preferred_dog_sizes,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+        
+        profileError = error;
+      } else {
+        // 新規プロフィールを作成
+        const { error } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            username: data.username,
+            bio: data.bio,
+            date_of_birth: data.date_of_birth,
+            gender: data.gender,
+            prefecture: data.prefecture,
+            city: data.city,
+            dog_owner_experience: data.dog_owner_experience,
+            avatar_url: data.avatar_url,
+            preferred_dog_breeds: data.preferred_dog_breeds,
+            preferred_dog_sizes: data.preferred_dog_sizes,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        
+        profileError = error;
+      }
+
+      if (profileError) throw profileError;
 
       if (isEditMode) {
         // 編集モードの場合は犬の選択画面へ
