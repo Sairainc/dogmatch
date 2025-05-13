@@ -350,26 +350,45 @@ export function RegistrationForm() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
       
-      // RLSポリシーに合わせてユーザーIDをパスの最初に配置
-      const fileName = `id_front_${Math.random()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
+      // ファイル名をシンプルに
+      const fileName = `id_front_${Date.now()}.${fileExt}`;
       
-      console.log('Uploading ID front to:', filePath);
+      console.log('Uploading ID front:', fileName);
       
-      const { error: uploadError } = await supabase.storage
+      // まずはシンプルなパスでアップロード試行
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('idverification')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) {
         console.error('Storage upload error details:', uploadError);
-        throw uploadError;
+        
+        // 失敗した場合、ユーザーIDをつけて再試行
+        console.log('Retrying with user folder...');
+        const folderPath = `${user.id}/${fileName}`;
+        
+        const { error: retryError, data: retryData } = await supabase.storage
+          .from('idverification')
+          .upload(folderPath, file);
+          
+        if (retryError) {
+          console.error('Retry upload failed:', retryError);
+          throw retryError;
+        }
+        
+        const { data } = supabase.storage.from('idverification').getPublicUrl(folderPath);
+        console.log('Public URL generated:', data.publicUrl);
+        
+        setIdFrontUrl(data.publicUrl);
+        verificationForm.setValue('id_front_url', data.publicUrl);
+      } else {
+        // 直接アップロードが成功した場合
+        const { data } = supabase.storage.from('idverification').getPublicUrl(fileName);
+        console.log('Public URL generated:', data.publicUrl);
+        
+        setIdFrontUrl(data.publicUrl);
+        verificationForm.setValue('id_front_url', data.publicUrl);
       }
-
-      const { data } = supabase.storage.from('idverification').getPublicUrl(filePath);
-      console.log('Public URL generated:', data.publicUrl);
-      
-      setIdFrontUrl(data.publicUrl);
-      verificationForm.setValue('id_front_url', data.publicUrl);
     } catch (error) {
       console.error('Error uploading ID front:', error);
       alert('身分証明書（表面）のアップロードに失敗しました。もう一度お試しください。');
@@ -391,26 +410,45 @@ export function RegistrationForm() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('ユーザーが見つかりません');
       
-      // RLSポリシーに合わせてユーザーIDをパスの最初に配置
-      const fileName = `id_back_${Math.random()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
+      // ファイル名をシンプルに
+      const fileName = `id_back_${Date.now()}.${fileExt}`;
       
-      console.log('Uploading ID back to:', filePath);
+      console.log('Uploading ID back:', fileName);
       
-      const { error: uploadError } = await supabase.storage
+      // まずはシンプルなパスでアップロード試行
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('idverification')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) {
         console.error('Storage upload error details:', uploadError);
-        throw uploadError;
+        
+        // 失敗した場合、ユーザーIDをつけて再試行
+        console.log('Retrying with user folder...');
+        const folderPath = `${user.id}/${fileName}`;
+        
+        const { error: retryError, data: retryData } = await supabase.storage
+          .from('idverification')
+          .upload(folderPath, file);
+          
+        if (retryError) {
+          console.error('Retry upload failed:', retryError);
+          throw retryError;
+        }
+        
+        const { data } = supabase.storage.from('idverification').getPublicUrl(folderPath);
+        console.log('Public URL generated:', data.publicUrl);
+        
+        setIdBackUrl(data.publicUrl);
+        verificationForm.setValue('id_back_url', data.publicUrl);
+      } else {
+        // 直接アップロードが成功した場合
+        const { data } = supabase.storage.from('idverification').getPublicUrl(fileName);
+        console.log('Public URL generated:', data.publicUrl);
+        
+        setIdBackUrl(data.publicUrl);
+        verificationForm.setValue('id_back_url', data.publicUrl);
       }
-
-      const { data } = supabase.storage.from('idverification').getPublicUrl(filePath);
-      console.log('Public URL generated:', data.publicUrl);
-      
-      setIdBackUrl(data.publicUrl);
-      verificationForm.setValue('id_back_url', data.publicUrl);
     } catch (error) {
       console.error('Error uploading ID back:', error);
       alert('身分証明書（裏面）のアップロードに失敗しました。もう一度お試しください。');
