@@ -72,7 +72,7 @@ export default function DiscoveryPage() {
           </div>
         </div>
 
-        <div className="flex justify-center gap-8 p-6">
+        <div className="flex justify-center gap-8 p-4 mb-16">
           <button
             onClick={handleDislike}
             className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center"
