@@ -102,3 +102,25 @@ Please file feedback and issues over on the [Supabase GitHub org](https://github
 - [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
 - [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
 - [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+
+## 画像表示の実装について
+
+画像表示の実装をシンプル化しました：
+
+1. `fixImageUrl`関数の簡素化
+   - 余分なデバッグログを削除
+   - 条件分岐をシンプルにして、必要最小限のロジックに集約
+
+2. エラーハンドリングの最適化
+   - 不要なログ出力を削除
+   - エラー時の代替表示（プレースホルダー画像やアイコン）をシンプルに
+
+3. CORS関連の修正
+   - `crossOrigin="anonymous"`属性を削除
+   - 必要最小限のプロキシ設定に集約
+
+4. アップロード機能のシンプル化
+   - ファイルアップロード処理をシンプルにし、デバッグログを削除
+
+5. デバッグ情報表示の削除
+   - プロフィールページの開発用デバッグ情報表示を削除

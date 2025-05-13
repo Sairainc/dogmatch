@@ -22,7 +22,6 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [avatarError, setAvatarError] = useState(false);
   const [dogPhotoErrors, setDogPhotoErrors] = useState<{[key: string]: boolean}>({});
-  const [debugInfo, setDebugInfo] = useState<string>('');
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,10 +49,6 @@ export default function ProfilePage() {
 
         if (profileError) throw profileError;
 
-        // 画像URLをデバッグ
-        let debug = `Avatar URL: ${profileData.avatar_url}\n`;
-        console.log('Avatar URL:', profileData.avatar_url);
-
         // 犬の情報を取得
         const { data: dogsData, error: dogsError } = await supabase
           .from('dogs')
@@ -61,21 +56,6 @@ export default function ProfilePage() {
           .eq('owner_id', user.id);
 
         if (dogsError) throw dogsError;
-        
-        // 犬の画像URLをデバッグ
-        if (dogsData && dogsData.length > 0) {
-          debug += 'Dog photos:\n';
-          dogsData.forEach((dog, index) => {
-            if (dog.photos_urls && dog.photos_urls.length > 0) {
-              debug += `Dog ${index+1} (${dog.name}): ${dog.photos_urls[0]}\n`;
-              console.log(`Dog photo URL for ${dog.name}:`, dog.photos_urls[0]);
-            } else {
-              debug += `Dog ${index+1} (${dog.name}): No photos\n`;
-            }
-          });
-        }
-        
-        setDebugInfo(debug);
         
         // 年齢計算
         let age = 0;
@@ -100,7 +80,6 @@ export default function ProfilePage() {
         
       } catch (error) {
         console.error('Error fetching profile data:', error);
-        setDebugInfo(`Error: ${JSON.stringify(error)}`);
       } finally {
         setIsLoading(false);
       }
@@ -114,28 +93,12 @@ export default function ProfilePage() {
   };
 
   // 画像読み込みエラー時のハンドラー
-  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleAvatarError = () => {
     setAvatarError(true);
-    console.log("Avatar image failed to load", e);
-    // 元のURLをログ出力
-    console.log("Failed URL:", e.currentTarget.src);
-    
-    // CORSエラーかどうかを確認
-    if (e.currentTarget.naturalWidth === 0) {
-      console.log("Possible CORS issue with avatar image");
-    }
   };
 
-  const handleDogPhotoError = (dogId: string, e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleDogPhotoError = (dogId: string) => {
     setDogPhotoErrors(prev => ({...prev, [dogId]: true}));
-    console.log(`Dog photo for dog ${dogId} failed to load`, e);
-    // 元のURLをログ出力
-    console.log("Failed URL:", e.currentTarget.src);
-    
-    // CORSエラーかどうかを確認
-    if (e.currentTarget.naturalWidth === 0) {
-      console.log("Possible CORS issue with dog image");
-    }
   };
 
   if (isLoading) {
@@ -166,7 +129,6 @@ export default function ProfilePage() {
                 src={fixImageUrl(profile.avatar_url)}
                 alt={profile.username || 'プロフィール画像'}
                 className="h-full w-full object-cover rounded-b-3xl"
-                crossOrigin="anonymous"
                 onError={handleAvatarError}
               />
             ) : (
@@ -198,14 +160,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* デバッグ情報（開発時のみ表示） */}
-            {process.env.NODE_ENV === 'development' && debugInfo && (
-              <div className="mb-6 p-3 bg-gray-100 rounded text-xs font-mono overflow-x-auto">
-                <h3 className="font-bold mb-1">デバッグ情報:</h3>
-                <pre>{debugInfo}</pre>
-              </div>
-            )}
-
             {dogs.length > 0 && (
               <div className="space-y-4">
                 <h2 className="text-lg font-semibold">愛犬の情報</h2>
@@ -219,8 +173,7 @@ export default function ProfilePage() {
                             src={fixImageUrl(dog.photos_urls[0])}
                             alt={dog.name}
                             className="w-full h-full object-cover"
-                            crossOrigin="anonymous"
-                            onError={(e) => handleDogPhotoError(dog.id, e)}
+                            onError={(e) => handleDogPhotoError(dog.id)}
                           />
                         </div>
                       ) : (

@@ -36,7 +36,6 @@ export default function DiscoveryPage() {
 
   const handleImageError = () => {
     setImageError(true);
-    console.log("Profile image failed to load");
   };
 
   if (currentIndex >= profiles.length) {
@@ -58,7 +57,6 @@ export default function DiscoveryPage() {
               src={fixImageUrl(currentProfile.image)}
               alt={currentProfile.dogName}
               className="w-full h-full object-cover"
-              crossOrigin="anonymous"
               onError={handleImageError}
             />
           ) : (

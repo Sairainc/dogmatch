@@ -294,7 +294,6 @@ export function RegistrationForm() {
 
       // 完全なURLパスを生成
       const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
-      console.log('Generated avatar URL:', data.publicUrl);
       
       setAvatarUrl(data.publicUrl);
       userForm.setValue('avatar_url', data.publicUrl);
@@ -330,7 +329,6 @@ export function RegistrationForm() {
 
       // 完全なURLパスを生成
       const { data } = supabase.storage.from('dogs').getPublicUrl(filePath);
-      console.log('Generated dog photo URL:', data.publicUrl);
       
       setDogPhotoUrl(data.publicUrl);
       const currentPhotos = dogForm.getValues('photos_urls') || [];
@@ -1018,7 +1016,7 @@ export function RegistrationForm() {
                   <div className="flex justify-center mb-6">
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
                       {dogPhotoUrl ? (
-                        <img src={fixImageUrl(dogPhotoUrl)} alt="愛犬の写真" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                        <img src={fixImageUrl(dogPhotoUrl)} alt="愛犬の写真" className="w-full h-full object-cover" />
                       ) : (
                         <Upload className="w-8 h-8 text-gray-400" />
                       )}
