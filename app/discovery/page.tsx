@@ -64,13 +64,13 @@ export default function DiscoveryPage() {
         // 既にLikeした相手のIDリストを取得
         const { data: likedUsers, error: likedError } = await supabase
           .from('likes')
-          .select('liked_id')
-          .eq('liker_id', user.id);
+          .select('liked_user_id')
+          .eq('liker_user_id', user.id);
 
         if (likedError) throw likedError;
 
         // likedUsersからIDのみの配列を作成
-        const likedUserIds = likedUsers ? likedUsers.map(like => like.liked_id) : [];
+        const likedUserIds = likedUsers ? likedUsers.map(like => like.liked_user_id) : [];
 
         let query = supabase
           .from('profiles')
@@ -187,8 +187,8 @@ export default function DiscoveryPage() {
     const { data, error } = await supabase
       .from('likes')
       .select('*')
-      .eq('liker_id', likedUserId)
-      .eq('liked_id', currentUser.id)
+      .eq('liker_user_id', likedUserId)
+      .eq('liked_user_id', currentUser.id)
       .single();
 
     if (error || !data) {
@@ -211,8 +211,8 @@ export default function DiscoveryPage() {
       const { error } = await supabase
         .from('likes')
         .insert({
-          liker_id: currentUser.id,
-          liked_id: likedProfile.id,
+          liker_user_id: currentUser.id,
+          liked_user_id: likedProfile.id,
           created_at: new Date().toISOString()
         });
 
