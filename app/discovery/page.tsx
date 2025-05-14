@@ -67,10 +67,31 @@ export default function DiscoveryPage() {
           .select('liked_user_id')
           .eq('liker_user_id', user.id);
 
-        if (likedError) throw likedError;
+        if (likedError) {
+          console.error('Error fetching liked users:', likedError);
+          throw likedError;
+        }
+        
+        console.log('Liked users:', likedUsers);
 
         // likedUsersからIDのみの配列を作成
         const likedUserIds = likedUsers ? likedUsers.map(like => like.liked_user_id) : [];
+        console.log('Liked user IDs:', likedUserIds);
+
+        // 全プロフィール数を確認
+        const { data: allProfiles, error: allProfilesError } = await supabase
+          .from('profiles')
+          .select('id, gender, is_profile_completed');
+          
+        if (allProfilesError) {
+          console.error('Error fetching all profiles:', allProfilesError);
+        } else {
+          console.log('All profiles:', allProfiles);
+          console.log('Total profiles count:', allProfiles?.length);
+          console.log('Completed profiles count:', allProfiles?.filter(p => p.is_profile_completed).length);
+          console.log('Male profiles count:', allProfiles?.filter(p => p.gender === 'male').length);
+          console.log('Female profiles count:', allProfiles?.filter(p => p.gender === 'female').length);
+        }
 
         let query = supabase
           .from('profiles')
@@ -96,20 +117,31 @@ export default function DiscoveryPage() {
           `)
           .neq('id', user.id) // 自分以外
           .eq('is_profile_completed', true); // プロフィール完了済み
+          
+        console.log('Current user ID:', user.id);
+        console.log('Current user gender:', myProfile.gender);
 
         // 性別でフィルタリング
         if (oppositeGender) {
+          console.log('Filtering by opposite gender:', oppositeGender);
           query = query.eq('gender', oppositeGender);
         }
 
         // 既にLikeした相手を除外
         if (likedUserIds.length > 0) {
+          console.log('Excluding liked users:', likedUserIds);
           query = query.not('id', 'in', `(${likedUserIds.join(',')})`);
         }
 
         const { data: matchProfiles, error: matchError } = await query;
 
-        if (matchError) throw matchError;
+        if (matchError) {
+          console.error('Error in main query:', matchError);
+          throw matchError;
+        }
+        
+        console.log('Match profiles before formatting:', matchProfiles);
+        console.log('Match profiles count:', matchProfiles?.length);
 
         // 年齢計算を含むプロフィール情報を整形
         const formattedProfiles = matchProfiles?.map(profile => {
