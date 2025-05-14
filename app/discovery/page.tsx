@@ -91,6 +91,30 @@ export default function DiscoveryPage() {
           console.log('Completed profiles count:', allProfiles?.filter(p => p.is_profile_completed).length);
           console.log('Male profiles count:', allProfiles?.filter(p => p.gender === 'male').length);
           console.log('Female profiles count:', allProfiles?.filter(p => p.gender === 'female').length);
+          
+          // 各プロフィールの詳細を表示
+          console.log('Profiles details:');
+          allProfiles?.forEach(p => {
+            console.log(`ID: ${p.id}, Gender: ${p.gender}, Completed: ${p.is_profile_completed}`);
+          });
+          
+          // 男性プロフィールの詳細確認
+          const maleProfiles = allProfiles?.filter(p => p.gender === 'male');
+          console.log('Male profiles details:', maleProfiles);
+          
+          // データベースから直接男性プロフィールを取得して確認
+          supabase
+            .from('profiles')
+            .select('*')
+            .eq('gender', 'male')
+            .then(({ data, error }) => {
+              if (error) {
+                console.error('Error fetching male profiles directly:', error);
+              } else {
+                console.log('Male profiles direct query:', data);
+                console.log('Male profiles direct count:', data?.length);
+              }
+            });
         }
 
         let query = supabase
