@@ -288,7 +288,7 @@ export default function ChatDetail() {
       </div>
       
       {/* メッセージ入力エリア */}
-      <div className="bg-white p-4">
+      <div className="bg-white p-4 pb-20">
         <div className="flex items-center gap-2">
           <input
             type="text"
