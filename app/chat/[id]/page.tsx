@@ -143,20 +143,28 @@ export default function ChatDetail() {
       // マッチしている相手のIDを特定
       const receiverId = matchData.user1_id === currentUser.id ? matchData.user2_id : matchData.user1_id;
       
+      // 送信するメッセージデータを作成
+      const newMessage = {
+        match_id: matchId,
+        sender_id: currentUser.id,
+        receiver_id: receiverId,
+        content: message,
+        created_at: new Date().toISOString(),
+        is_read: false
+      };
+      
       // メッセージを送信
       const { data, error } = await supabase
         .from('messages')
-        .insert({
-          match_id: matchId,
-          sender_id: currentUser.id,
-          receiver_id: receiverId,
-          content: message,
-          created_at: new Date().toISOString(),
-          is_read: false
-        })
+        .insert(newMessage)
         .select();
 
       if (error) throw error;
+      
+      // 送信したメッセージをローカルステートに追加して即時反映
+      if (data && data.length > 0) {
+        setMessages(prev => [...prev, data[0]]);
+      }
 
       // マッチングの最終メッセージ日時を更新
       await supabase
