@@ -140,12 +140,16 @@ export default function ChatDetail() {
     if (!message.trim() || !currentUser || !matchData) return;
 
     try {
+      // マッチしている相手のIDを特定
+      const receiverId = matchData.user1_id === currentUser.id ? matchData.user2_id : matchData.user1_id;
+      
       // メッセージを送信
       const { data, error } = await supabase
         .from('messages')
         .insert({
           match_id: matchId,
           sender_id: currentUser.id,
+          receiver_id: receiverId,
           content: message,
           created_at: new Date().toISOString(),
           is_read: false
